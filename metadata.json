@@ -1,0 +1,6 @@
+{
+  "name": "ECS — Environmental Calculation System",
+  "description": "Hệ thống tính toán kỹ thuật môi trường chuyên nghiệp: tính tải lượng ô nhiễm, lựa chọn công nghệ và tính toán thiết kế chi tiết các công trình xử lý.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

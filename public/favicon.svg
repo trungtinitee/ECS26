@@ -1,0 +1,32 @@
+<svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="ecsBgGrad" x1="10" y1="10" x2="90" y2="90" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stopColor="#0a3f27" />
+      <stop offset="45%" stopColor="#13603d" />
+      <stop offset="100%" stopColor="#1e8252" />
+    </linearGradient>
+    <linearGradient id="ecsFlowGrad" x1="20" y1="20" x2="80" y2="80" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stopColor="#34d399" />
+      <stop offset="50%" stopColor="#10b981" />
+      <stop offset="100%" stopColor="#059669" />
+    </linearGradient>
+    <linearGradient id="ecsWaterGrad" x1="30" y1="10" x2="70" y2="90" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stopColor="#67e8f9" />
+      <stop offset="55%" stopColor="#06b6d4" />
+      <stop offset="100%" stopColor="#0284c7" />
+    </linearGradient>
+    <linearGradient id="ecsGloss" x1="50" y1="0" x2="50" y2="60" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stopColor="#ffffff" stopOpacity="0.3" />
+      <stop offset="100%" stopColor="#ffffff" stopOpacity="0.0" />
+    </linearGradient>
+  </defs>
+
+  <rect x="4" y="4" width="92" height="92" rx="26" fill="url(#ecsBgGrad)" stroke="#38a169" stroke-width="2" stroke-opacity="0.5" />
+  <rect x="4" y="4" width="92" height="46" rx="26" fill="url(#ecsGloss)" />
+
+  <path d="M50 20 C64 20 78 32 78 48 C78 64 66 78 50 78 C36 78 24 66 24 52 C24 38 36 24 50 20 Z" fill="none" stroke="url(#ecsWaterGrad)" stroke-width="7" stroke-linecap="round" />
+  <path d="M32 38 C40 28 62 26 68 38 C74 50 48 52 52 64 C55 72 64 74 68 68" fill="none" stroke="url(#ecsFlowGrad)" stroke-width="6" stroke-linecap="round" />
+  <path d="M50 32 C50 32 40 46 40 52 C40 57.5 44.5 62 50 62 C55.5 62 60 57.5 60 52 C60 46 50 32 50 32 Z" fill="url(#ecsWaterGrad)" />
+  <circle cx="50" cy="52" r="3" fill="#ffffff" />
+  <circle cx="68" cy="38" r="2.8" fill="#a7f3d0" />
+</svg>
