@@ -1,0 +1,3129 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ECS V74 — ECS — Environmental Calculation System</title>
+<style>
+:root{--app:#e9eeeb;--panel:#fff;--ink:#20342b;--muted:#6d7c74;--line:#cfd9d2;--green:#176b45;--green-soft:#e1f0e7;--blue:#eaf2f8;--amber:#fff4d7;--shadow:0 2px 8px #173d2710;--r:8px}
+*{box-sizing:border-box}body{margin:0;color:var(--ink);background:var(--app);font:13px/1.4 "Segoe UI",Arial,sans-serif}button,input,select{font:inherit}button{cursor:pointer}
+.top{background:#fff;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:5}
+.titlebar{height:48px;display:flex;align-items:center;gap:12px;padding:0 16px;border-bottom:1px solid #e7ece8}
+.logo{min-width:34px;height:27px;padding:0 4px;display:grid;place-items:center;background:var(--green);color:#fff;border-radius:6px;font-size:10px;font-weight:800}
+.appname{font-size:15px;font-weight:750}.appname small{display:block;font-size:10px;color:var(--muted);font-weight:500}
+.project-name{margin-left:20px;display:flex;align-items:center;gap:8px;min-width:0}.project-name input{width:min(340px,35vw);border:1px solid var(--line);padding:6px 9px;border-radius:5px;font-weight:650}
+.topright{margin-left:auto;display:flex;gap:6px;align-items:center}.btn{border:1px solid var(--line);background:#fff;padding:7px 10px;border-radius:5px;color:var(--ink);font-weight:600}.btn:hover{background:#f3f7f4}.btn.primary{background:var(--green);border-color:var(--green);color:#fff}.btn.primary:hover{background:#105a39}
+.ribbon{display:flex;gap:3px;align-items:stretch;padding:5px 12px;overflow-x:auto}.ribbon-group{display:flex;align-items:center;gap:4px;padding:0 9px;border-right:1px solid var(--line);white-space:nowrap}.ribbon-group:last-child{border:0}.ribbon-label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;margin-right:4px}.ribbon .btn{padding:6px 9px}
+.workspace{display:grid;grid-template-columns:minmax(0,1fr) 330px;min-height:calc(100vh - 100px)}
+.center{min-width:0;padding:14px;display:flex;flex-direction:column;gap:12px}
+.right{background:#f8faf8;border-left:1px solid var(--line);padding:12px;min-width:0}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow);min-width:0}
+.panelhead{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:10px 12px;border-bottom:1px solid var(--line);background:#fbfcfb;border-radius:var(--r) var(--r) 0 0}
+.panelhead h2{font-size:13px;margin:0;font-weight:750}.sub{font-size:11px;color:var(--muted);margin-top:2px}.panelbody{padding:12px}
+.modulebar{display:flex;gap:6px;flex-wrap:wrap;padding:10px}
+.module{border:1px solid var(--line);background:#fff;border-radius:6px;padding:9px 12px;display:flex;align-items:center;gap:7px;font-weight:650;color:#42564a}
+.module.active{border-color:var(--green);background:var(--green-soft);color:var(--green);box-shadow:inset 0 0 0 1px #176b4520}
+.module .sym{font-size:17px}
+.sectionlabel{font-size:10px;text-transform:uppercase;letter-spacing:.7px;color:var(--muted);font-weight:800;margin:2px 0 9px}
+.formgrid{display:grid;grid-template-columns:repeat(3,minmax(120px,1fr));gap:10px}
+.field{min-width:0}.field label{display:block;font-size:12px;font-weight:650;margin-bottom:4px}.field input,.field select{width:100%;min-width:0;padding:7px 8px;border:1px solid #c8d5cc;border-radius:5px;background:#fff;color:var(--ink)}.field input:focus,.field select:focus{outline:2px solid #b8dfc8;border-color:var(--green)}.unit{font-size:10px;color:var(--muted);margin-top:3px}
+.results{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-bottom:12px}
+.metric{padding:10px;border:1px solid var(--line);background:#fbfdfb;border-radius:6px;min-width:0}.metric .name{font-size:11px;color:var(--muted)}.metric .value{font-size:21px;font-weight:800;letter-spacing:-.3px;margin:3px 0 0;font-variant-numeric:tabular-nums}.metric .unit{margin-top:0}
+.tablewrap{width:100%;max-width:100%;overflow:visible;min-width:0}
+table{border-collapse:collapse;width:100%;max-width:100%;table-layout:fixed;font-variant-numeric:tabular-nums}
+th,td{box-sizing:border-box;padding:9px 10px;border-bottom:1px solid #e3e9e4;text-align:right;white-space:normal;overflow-wrap:anywhere;word-break:normal;vertical-align:middle}
+th{font-size:11px;line-height:1.35;color:#5f7166;background:#f2f6f3;font-weight:750}
+td{font-size:13px;line-height:1.4}
+td:first-child,th:first-child{text-align:left;width:56%}
+th:nth-child(2),td:nth-child(2){width:20%}
+th:nth-child(3),td:nth-child(3){width:24%}
+tbody tr:last-child td{border-bottom:0}
+@media(max-width:760px){
+  th,td{padding:8px 7px;font-size:12px}
+  th:first-child,td:first-child{width:52%}
+  th:nth-child(2),td:nth-child(2){width:22%}
+  th:nth-child(3),td:nth-child(3){width:26%}
+}
+@media(max-width:520px){
+  .data-table{table-layout:fixed}
+  .data-table thead{display:none}
+  .data-table tbody{display:block;width:100%}
+  .data-table tbody tr{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:0 10px;padding:9px 0;border-bottom:1px solid #e3e9e4}
+  .data-table tbody tr:last-child{border-bottom:0}
+  .data-table tbody td{display:block;width:auto!important;min-width:0;padding:3px 0;border:0;text-align:left!important;font-size:12px;overflow-wrap:anywhere}
+  .data-table tbody td:first-child{grid-column:1/-1;padding-bottom:5px;font-weight:650;color:#294b38}
+  .data-table tbody td:nth-child(2)::before{content:"Kết quả";display:block;margin-bottom:2px;color:#718176;font-size:10px;font-weight:600}
+  .data-table tbody td:nth-child(3)::before{content:"Số liệu nhập";display:block;margin-bottom:2px;color:#718176;font-size:10px;font-weight:600}
+}.tablefoot{font-size:11px;color:var(--muted);padding-top:8px}
+.inspector-title{font-size:14px;font-weight:800;margin:0}.inspector-sub{font-size:11px;color:var(--muted);margin-top:3px}.inspector-block{padding:12px 0;border-bottom:1px solid var(--line)}.inspector-block:last-child{border-bottom:0}.inspector-block h3{font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:var(--green);margin:0 0 10px}
+.properties{display:grid;gap:10px}.properties .field label{font-size:12px}.prop-note{padding:9px;background:#f0f6f1;border-radius:5px;color:#52675a;font-size:11px}
+.statusbar{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid var(--line);height:25px;display:flex;align-items:center;gap:18px;padding:0 12px;font-size:10px;color:var(--muted);z-index:4}.statusbar .ok{color:var(--green);font-weight:700;margin-left:auto}
+.hidden{display:none!important}
+@media(max-width:1050px){.workspace{grid-template-columns:minmax(0,1fr) 290px}.formgrid{grid-template-columns:repeat(2,minmax(0,1fr))}.results{grid-template-columns:repeat(2,minmax(0,1fr))}.ribbon-group{padding:0 5px}}
+@media(max-width:760px){.titlebar{height:auto;min-height:48px;flex-wrap:wrap;padding:8px 10px}.project-name{margin-left:0;order:3;width:100%}.project-name input{width:100%}.topright{gap:4px}.topright .btn{padding:6px}.workspace{display:flex;flex-direction:column-reverse}.right{border-left:0;border-top:1px solid var(--line);padding:10px}.center{padding:10px}.formgrid{grid-template-columns:repeat(2,minmax(0,1fr))}.ribbon{padding:5px}.ribbon-group{padding:0 5px}.statusbar{position:static}.results{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:420px){.formgrid{grid-template-columns:1fr}.appname small{display:none}.ribbon-label{display:none}.results .value{font-size:19px}}
+
+.menubar{height:31px;display:flex;align-items:stretch;gap:2px;padding:0 12px;border-bottom:1px solid var(--line);background:#fbfcfb}
+.menuitem{border:0;background:transparent;padding:0 13px;color:#40564a;border-bottom:2px solid transparent;font-weight:600}
+.menuitem:hover{background:#eef5f0}
+.menuitem.design-locked{opacity:.34!important;color:#87938c!important;background:#f2f4f2!important;border-bottom-color:transparent!important;cursor:not-allowed!important;filter:grayscale(1)}
+.dropdown button.design-domain-locked{opacity:.38!important;color:#87938c!important;background:#f5f6f5!important;cursor:not-allowed!important}
+.menuitem.active{color:var(--green);border-bottom-color:var(--green);background:#f2f8f4}
+.load-properties{margin-top:12px;padding-top:12px}
+.load-properties h3{font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:var(--green);margin:0 0 12px}
+.load-properties .properties{display:grid;gap:12px}
+.load-properties .formgrid{grid-template-columns:1fr;gap:9px}
+.load-properties .sectionlabel{margin:4px 0 7px!important}
+.load-properties .field input{padding:6px 7px}
+
+
+.menuwrap{position:relative;display:flex;align-items:stretch}
+.menuitem{white-space:nowrap;cursor:pointer}
+.dropdown{display:none;position:absolute;top:100%;left:0;min-width:220px;padding:6px;background:#fff;border:1px solid var(--line);border-radius:0 0 9px 9px;box-shadow:0 10px 24px #18332620;z-index:20}
+.menuwrap.open .dropdown{display:grid;gap:3px}
+.dropdown button{border:0;background:transparent;text-align:left;padding:9px 11px;border-radius:6px;color:var(--ink);font:inherit;cursor:pointer;white-space:nowrap}
+.dropdown button:hover{background:#edf6f0;color:var(--green)}
+.dropdown-label{font-size:11px;color:var(--muted);padding:5px 7px 0}
+.dropdown input{width:100%;border:1px solid var(--line);border-radius:6px;padding:8px;font:inherit}
+.dropdown-note{font-size:12px;line-height:1.5;padding:8px;max-width:230px;color:var(--muted)}
+@media(max-width:760px){.menubar{height:auto;min-height:36px;flex-wrap:wrap;padding:3px 7px}.menuitem{padding:7px 9px}.dropdown{position:absolute;min-width:200px}}
+
+
+.project-modal-backdrop{display:none;position:fixed;inset:0;background:#17271f70;z-index:50;align-items:center;justify-content:center;padding:18px}
+.project-modal-backdrop.open{display:flex}
+.project-modal{width:min(760px,100%);max-height:min(88vh,820px);overflow:auto;background:#fff;border:1px solid var(--line);border-radius:12px;box-shadow:0 20px 60px #0003}
+.project-modal-head{display:flex;align-items:center;justify-content:space-between;padding:16px 18px;border-bottom:1px solid var(--line)}
+.project-modal-head h2{font-size:16px;margin:0}
+.project-modal-body{padding:18px}
+.project-form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:13px}
+.project-form-grid .field.full{grid-column:1/-1}
+.project-form-grid textarea{width:100%;min-height:78px;resize:vertical;padding:8px;border:1px solid #c8d5cc;border-radius:5px;font:inherit}
+.project-modal-actions{display:flex;justify-content:flex-end;gap:8px;padding:12px 18px;border-top:1px solid var(--line)}
+@media(max-width:520px){.project-modal-backdrop{padding:8px}.project-form-grid{grid-template-columns:1fr}.project-form-grid .field.full{grid-column:auto}}
+
+
+.dropdown-separator{height:1px;background:var(--line);margin:4px 2px}
+.dropdown button[data-action="exitApp"]{color:#9c3434}
+
+
+.project-page{display:grid;grid-template-columns:minmax(0,1fr) 330px;gap:14px;padding:14px;min-height:calc(100vh - 110px);align-items:start}
+.project-page-main{display:block;min-width:0;width:100%}.project-page-properties{display:none;min-width:0}
+.project-summary-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.project-summary-item{padding:12px;border:1px solid var(--line);border-radius:6px;background:#fbfdfb;min-width:0}
+.project-summary-item.full{grid-column:1/-1}
+.summary-label{font-size:11px;color:var(--muted);margin-bottom:5px}
+.summary-value{font-weight:700;overflow-wrap:anywhere;white-space:pre-wrap}
+.summary-value.description{font-weight:400;min-height:42px}
+.project-page-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:14px}
+.project-fields{gap:12px}
+.project-fields textarea{width:100%;min-height:85px;resize:vertical;padding:8px;border:1px solid #c8d5cc;border-radius:5px;font:inherit}
+@media(max-width:850px){.project-page{grid-template-columns:minmax(0,1fr) 290px}}
+@media(max-width:680px){.project-page{grid-template-columns:1fr;padding:10px}.project-summary-grid{grid-template-columns:1fr}.project-summary-item.full{grid-column:auto}}
+
+
+.home-page{max-width:1180px;margin:0 auto;padding:28px 18px 54px;min-height:calc(100vh - 130px)}
+.home-hero{display:flex;align-items:center;gap:22px;padding:28px;margin-bottom:18px;border:1px solid var(--line);border-radius:12px;background:linear-gradient(120deg,#fff 0%,#f0f7f2 100%);box-shadow:var(--shadow)}
+.home-brand-mark{flex:0 0 72px;width:72px;height:72px;display:grid;place-items:center;border-radius:16px;background:var(--green);color:#fff;font-size:23px;font-weight:850}
+.home-eyebrow{font-size:10px;letter-spacing:1.2px;font-weight:800;color:var(--green)}
+.home-hero h1{font-size:29px;line-height:1.15;margin:5px 0 8px;letter-spacing:-.6px}
+.home-hero p{margin:0;color:var(--muted);font-size:14px;max-width:620px}
+.home-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:18px}
+.ece-domains{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.ece-domain{display:flex;gap:11px;align-items:flex-start;padding:13px;border:1px solid var(--line);border-radius:8px;background:#fff;min-width:0}
+.ece-domain-icon{flex:0 0 36px;height:36px;display:grid;place-items:center;border-radius:8px;background:var(--green-soft);font-size:19px}
+.ece-domain strong{display:block;font-size:13px}.ece-domain p{margin:4px 0 0;color:var(--muted);font-size:12px;line-height:1.5}.ece-note{margin:12px 0 0;color:var(--muted);font-size:11px;line-height:1.5}
+.home-projects-panel{margin-top:16px}
+.saved-projects-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.saved-project-card{border:1px solid var(--line);border-radius:8px;padding:13px;background:#fff;display:flex;gap:12px;align-items:flex-start;min-width:0}
+.saved-project-card:hover{border-color:#8db9a0;background:#fbfefc}
+.saved-project-icon{flex:0 0 36px;height:36px;border-radius:8px;display:grid;place-items:center;background:var(--green-soft);color:var(--green);font-weight:800;font-size:17px}
+.saved-project-info{min-width:0;flex:1}
+.saved-project-name{font-weight:800;font-size:13px;overflow-wrap:anywhere}
+.saved-project-meta{font-size:11px;color:var(--muted);margin-top:4px;line-height:1.5;overflow-wrap:anywhere}
+.saved-project-actions{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+.saved-project-actions .btn{padding:5px 8px;font-size:11px}
+.empty-projects{text-align:center;padding:34px 12px;color:var(--muted)}
+.empty-projects-icon{font-size:28px;color:#91a99a;margin-bottom:8px}
+.empty-projects strong{display:block;color:var(--ink);font-size:13px}
+.empty-projects p{max-width:480px;margin:6px auto 0;line-height:1.6;font-size:12px}
+.home-footnote{font-size:11px;color:var(--muted);padding:12px 2px}
+@media(max-width:680px){.ece-domains{grid-template-columns:1fr}.home-page{padding:14px 10px 36px}.home-hero{padding:18px;align-items:flex-start;gap:13px}.home-brand-mark{flex-basis:48px;width:48px;height:48px;font-size:27px;border-radius:11px}.home-hero h1{font-size:23px}.home-hero p{font-size:12px}.saved-projects-list{grid-template-columns:1fr}}
+
+
+
+/* WWTC Next — responsive layout correction for project information page */
+.project-page{
+  display:grid;
+  grid-template-columns:minmax(0,1fr);
+  width:100%;
+  max-width:1440px;
+  margin:0 auto;
+  padding:clamp(8px,1.5vw,18px);
+  box-sizing:border-box;
+  align-items:start;
+}
+.project-page-main{display:block!important;width:100%;min-width:0}
+.project-page-main>.panel{width:100%;min-width:0}
+.project-page-properties{display:none!important}
+.project-page .panelbody{min-width:0}
+.project-page .project-fields{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:14px;
+}
+.project-page .project-fields .field{min-width:0}
+.project-page .project-fields input,
+.project-page .project-fields select,
+.project-page .project-fields textarea{
+  display:block;
+  width:100%;
+  max-width:100%;
+  min-width:0;
+  box-sizing:border-box;
+}
+.project-page .project-fields .field:has(textarea){grid-column:1/-1}
+.project-page .project-page-actions{
+  display:flex;
+  justify-content:flex-end;
+  align-items:center;
+  flex-wrap:wrap;
+  gap:8px;
+}
+@media(max-width:760px){
+  .project-page{padding:10px}
+  .project-page .project-fields{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+  .project-page .panelhead{gap:8px;align-items:flex-start}
+  .project-page .panelhead>div{min-width:0}
+  .project-page .panelhead h2{overflow-wrap:anywhere}
+}
+@media(max-width:520px){
+  .project-page{padding:7px}
+  .project-page .panelhead{flex-direction:column}
+  .project-page .project-fields{grid-template-columns:minmax(0,1fr);gap:10px}
+  .project-page .project-fields .field:has(textarea){grid-column:auto}
+  .project-page .project-page-actions{display:grid;grid-template-columns:minmax(0,1fr);width:100%}
+  .project-page .project-page-actions .btn{width:100%;justify-content:center}
+}
+
+
+.domain-page{max-width:1180px;margin:0 auto;padding:24px 18px 40px;min-height:calc(100vh - 130px)}
+.domain-intro{text-align:center;margin:12px auto 24px;max-width:700px}
+.domain-intro h1{font-size:clamp(23px,3vw,32px);margin:0 0 8px;color:var(--ink);letter-spacing:-.5px}
+.domain-intro p{margin:0;color:var(--muted);font-size:14px;line-height:1.6}
+.domain-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.domain-card{display:flex;gap:15px;align-items:flex-start;text-align:left;width:100%;min-height:145px;padding:20px;border:1px solid var(--line);border-radius:12px;background:#fff;color:var(--ink);box-shadow:var(--shadow);transition:border-color .15s,box-shadow .15s,transform .15s}
+.domain-card:hover{border-color:var(--green);box-shadow:0 5px 18px #173d2714;transform:translateY(-1px)}
+.domain-icon{display:grid;place-items:center;flex:0 0 52px;height:52px;border-radius:12px;background:var(--green-soft);font-size:25px}
+.domain-card h2{font-size:17px;margin:1px 0 7px}.domain-card p{font-size:13px;line-height:1.55;color:var(--muted);margin:0 0 13px}.domain-card .choose{font-size:12px;font-weight:750;color:var(--green)}
+.domain-empty{max-width:700px;margin:26px auto;padding:26px;background:#fff;border:1px solid var(--line);border-radius:12px;text-align:center}
+.domain-empty h2{margin:0 0 8px}.domain-empty p{color:var(--muted);line-height:1.6}
+.domain-empty-actions{display:flex;justify-content:center;gap:8px;flex-wrap:wrap;margin-top:18px}
+.wastewater-tools-page{max-width:1180px;margin:0 auto;padding:24px 18px 40px;min-height:calc(100vh - 130px)}
+.tool-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.tool-card{display:flex;gap:15px;align-items:flex-start;text-align:left;width:100%;min-height:125px;padding:20px;border:1px solid var(--line);border-radius:12px;background:#fff;color:var(--ink);box-shadow:var(--shadow);cursor:pointer}
+.tool-card:hover{border-color:var(--green);box-shadow:0 5px 18px #173d2714}
+.tool-card h2{font-size:17px;margin:1px 0 7px}.tool-card p{font-size:13px;line-height:1.55;color:var(--muted);margin:0 0 13px}
+@media(max-width:650px){.wastewater-tools-page{padding:18px 12px 30px}.tool-grid{grid-template-columns:1fr;gap:10px}.tool-card{min-height:0;padding:16px}}
+
+@media(max-width:650px){.domain-page{padding:18px 12px 30px}.domain-grid{grid-template-columns:1fr;gap:10px}.domain-card{min-height:0;padding:16px}.domain-intro{text-align:left;margin:4px 0 18px}.domain-icon{flex-basis:46px;height:46px}}
+
+
+.workspace-backbar{display:flex;justify-content:flex-start;margin:0 0 12px;gap:8px}
+.workspace-backbar .btn{min-height:40px}
+@media(max-width:650px){.workspace-backbar{margin-bottom:10px}.workspace-backbar .btn{width:100%}}
+
+/* ECS load input compact layout */
+.load-properties .formgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px 14px}
+.load-properties .field label{font-size:12px;line-height:1.35;min-height:0;margin-bottom:5px}
+.load-properties .field input,.load-properties .field select{box-sizing:border-box;min-height:38px}
+.load-properties .unit{display:none}
+@media(max-width:520px){.load-properties .formgrid{grid-template-columns:minmax(0,1fr);gap:10px}}
+
+
+/* ECS custom save/discard decision dialog */
+.ecs-decision-overlay{
+  position:fixed;inset:0;z-index:100500;display:flex;align-items:center;justify-content:center;
+  padding:20px;background:rgba(12,25,19,.62);backdrop-filter:blur(5px);
+  animation:ecsFadeIn .16s ease-out;
+}
+
+.ecs-decision-dialog.ecs-decision-simple{width:min(390px,100%);padding:23px 24px 20px;gap:0;border-radius:17px}
+.ecs-decision-simple .ecs-decision-content h2{font-size:19px;margin:0 0 8px}
+.ecs-decision-simple .ecs-decision-content p{font-size:14px;margin:0;color:#59685f}
+.ecs-decision-simple .ecs-decision-actions{margin-top:20px}
+@media(max-width:520px){.ecs-decision-dialog.ecs-decision-simple{padding:21px 19px 18px}.ecs-decision-simple .ecs-decision-actions{margin-top:17px}}
+
+.ecs-decision-dialog{
+  width:min(490px,100%);display:flex;gap:17px;align-items:flex-start;
+  padding:27px 27px 24px;background:#fff;border:1px solid #e1e9e3;border-radius:22px;
+  box-shadow:0 24px 80px rgba(0,0,0,.28);color:#20352a;
+  animation:ecsDialogIn .2s ease-out;
+}
+.ecs-decision-icon{
+  flex:0 0 44px;width:44px;height:44px;border-radius:14px;display:grid;place-items:center;
+  color:#a66a13;background:#fff3d9;font-size:23px;font-weight:800;
+}
+.ecs-decision-icon span{width:23px;height:23px;border:2px solid currentColor;border-radius:50%;display:grid;place-items:center;font-size:15px}
+.ecs-decision-content{min-width:0;flex:1}
+.ecs-decision-eyebrow{font-size:10px;font-weight:800;letter-spacing:1.35px;color:#789083;margin:2px 0 7px}
+.ecs-decision-content h2{font-size:21px;line-height:1.25;margin:0 0 9px;color:#193c2b}
+.ecs-decision-content p{font-size:14px;line-height:1.55;color:#52645a;margin:0 0 13px}
+.ecs-decision-note{padding:12px 13px;border-radius:11px;background:#f3f7f4;border:1px solid #e5eee7;color:#596a60;font-size:12px;line-height:1.55}
+.ecs-decision-note strong{color:#285c40}
+.ecs-decision-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:21px}
+.ecs-decision-actions button{min-height:43px;padding:0 17px;border-radius:10px;font:600 14px system-ui,sans-serif;cursor:pointer;transition:transform .15s,background .15s}
+.ecs-decision-actions button:active{transform:scale(.97)}
+.ecs-decision-discard{border:1px solid #d8e1da;background:#fff;color:#47594e}
+.ecs-decision-discard:hover{background:#f4f6f4}
+.ecs-decision-save{border:1px solid #176b45;background:#176b45;color:#fff;box-shadow:0 3px 8px rgba(23,107,69,.18)}
+.ecs-decision-save:hover{background:#105b39}
+.ecs-decision-save span{margin-right:5px}
+@keyframes ecsFadeIn{from{opacity:0}to{opacity:1}}
+@keyframes ecsDialogIn{from{opacity:0;transform:translateY(8px) scale(.985)}to{opacity:1;transform:translateY(0) scale(1)}}
+@media(max-width:520px){
+ .ecs-decision-overlay{padding:16px;align-items:center}
+ .ecs-decision-dialog{padding:22px 19px 19px;gap:13px;border-radius:19px}
+ .ecs-decision-icon{width:38px;height:38px;flex-basis:38px;border-radius:12px}
+ .ecs-decision-content h2{font-size:19px}
+ .ecs-decision-content p{font-size:13px}
+ .ecs-decision-actions{gap:8px;margin-top:17px}
+ .ecs-decision-actions button{flex:1;padding:0 10px;font-size:13px}
+}
+
+
+/* ECS: nền sáng cho ô Mô tả / ghi chú dự án */
+.project-page #projectDescription,
+#projectDescription{
+  background:#ffffff!important;
+  color:#20352a!important;
+  border:1px solid #c8d5cc!important;
+  caret-color:#176b45;
+  color-scheme:light;
+}
+.project-page #projectDescription::placeholder,
+#projectDescription::placeholder{
+  color:#87958c!important;
+  opacity:1;
+}
+.project-page #projectDescription:focus,
+#projectDescription:focus{
+  background:#ffffff!important;
+  border-color:#78a88c!important;
+  outline:2px solid rgba(23,107,69,.12);
+}
+
+
+/* ECS: khóa mục Thông tin dự án khi chưa có dự án đã lưu đang mở */
+[data-action="openProjectDetails"].project-info-locked,
+[data-action="openProjectDetails"]:disabled{
+  opacity:.38!important;
+  color:#87938c!important;
+  background:#f2f4f2!important;
+  cursor:not-allowed!important;
+  filter:grayscale(1);
+}
+
+
+[data-action="saveLocal"].project-info-locked,
+[data-action="saveLocal"]:disabled{
+  opacity:.38!important;color:#87938c!important;background:#f2f4f2!important;
+  cursor:not-allowed!important;filter:grayscale(1);
+}
+
+
+/* Legacy compatibility controls are data-only and must not render in the project form. */
+#legacyProjectDesignFields,
+#legacyProjectDesignFields[hidden],
+#legacyProjectDesignFields select {display:none!important}
+\n
+/* ECS V14 — simple design-domain checkboxes */
+.project-fields .design-fields-field{grid-column:1/-1}
+.design-fields-options{display:flex;flex-wrap:wrap;gap:10px 22px;margin-top:4px}
+.design-field-option{
+  display:inline-flex;align-items:center;justify-content:flex-start;gap:7px;
+  min-height:28px;padding:2px 0;border:0;border-radius:0;background:transparent;
+  color:#263d31;font-size:14px;font-weight:500;line-height:1.35;cursor:pointer;
+}
+.design-field-option:has(input:checked){border:0;background:transparent;color:#263d31;box-shadow:none}
+.design-field-option input{
+  appearance:auto;-webkit-appearance:checkbox;display:inline-block;
+  width:16px;height:16px;min-width:16px;margin:0;accent-color:#176b45;cursor:pointer;
+}
+@media(max-width:650px){
+  .design-fields-options{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px 14px}
+  .design-field-option{min-height:28px;font-size:13px}
+}
+
+/* ECS V16: conditional custom wastewater type */
+#otherWastewaterTypeField[hidden]{display:none!important}
+\n
+/* ECS V28 — collapse directly from the input card heading */
+.input-review-panel{margin-bottom:16px;overflow:hidden}
+.input-review-head{
+  display:flex;align-items:center;justify-content:space-between;gap:14px;
+  min-height:70px;padding:14px 15px;cursor:pointer;list-style:none;
+  user-select:none;
+}
+.input-review-head::-webkit-details-marker{display:none}
+.input-review-heading h2{margin:0}
+.input-review-heading .sub{margin-top:3px}
+.input-review-chevron{
+  width:9px;height:9px;flex:0 0 9px;margin-right:4px;
+  border-right:1.5px solid #60796a;border-bottom:1.5px solid #60796a;
+  transform:rotate(45deg) translateY(-2px);transition:transform .18s ease;
+}
+.input-review-panel[open] .input-review-head{border-bottom:1px solid #dce5df}
+.input-review-panel[open] .input-review-chevron{transform:rotate(225deg) translate(-2px,-1px)}
+.input-review-head:hover{background:#f8faf9}
+.input-review-body{padding-top:14px}
+@media(max-width:650px){
+  .input-review-head{min-height:62px;padding:12px}
+}
+
+/* ECS V29 — bottom navigation after calculation results */
+.results-bottom-actions{
+  display:flex;
+  justify-content:flex-start;
+  padding:14px 0 4px;
+}
+.results-bottom-actions .btn{min-height:36px}
+@media(max-width:650px){
+  .results-bottom-actions{padding:12px 0 2px}
+  .results-bottom-actions .btn{width:100%}
+}
+
+/* ECS V30 — unified visual system for all navigation-back buttons */
+.back-button{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:7px;
+  box-sizing:border-box;
+  min-width:176px;
+  min-height:40px;
+  padding:9px 15px;
+  border:1px solid #cbd9d0;
+  border-radius:7px;
+  background:#f5f8f6;
+  color:#315b42;
+  font:600 13px/1.2 inherit;
+  text-align:center;
+  text-decoration:none;
+  box-shadow:none;
+  transition:background-color .16s ease,border-color .16s ease,color .16s ease;
+}
+.back-button:hover{
+  background:#eaf2ed;
+  border-color:#9fb8a7;
+  color:#244b34;
+}
+.back-button:focus-visible{
+  outline:2px solid #6b9b7c;
+  outline-offset:2px;
+}
+.back-button:active{background:#e2ece5}
+.workspace-backbar .back-button{width:auto;min-height:40px}
+.results-bottom-actions .back-button{width:auto;min-height:40px}
+@media(max-width:650px){
+  .back-button{width:100%;min-width:0;min-height:42px}
+  .workspace-backbar .back-button,.results-bottom-actions .back-button{width:100%}
+}
+
+/* ECS V31 — prevent horizontal overflow in data-table containers */
+.data-table{table-layout:fixed;max-width:100%}
+.data-table th,.data-table td{white-space:normal;overflow-wrap:anywhere}
+.panelbody,.input-review-body,.calculation-results{min-width:0;max-width:100%}
+ 
+
+/* ECS V35 — refined technology selection visual system */
+.technology-selection-page,
+#technologySelectionPage{
+  --tech-ink:#183b2b;
+  --tech-muted:#718176;
+  --tech-line:#dce7df;
+  --tech-green:#28734b;
+  --tech-soft:#f5f9f6;
+}
+#technologySelectionPage{
+  padding:clamp(18px,2.2vw,30px);
+  background:#f3f7f4;
+}
+#technologySelectionPage .domain-intro{
+  max-width:760px;
+  margin:0 auto 24px;
+  text-align:center;
+}
+#technologySelectionPage .domain-intro h1{
+  margin:0 0 7px;
+  color:var(--tech-ink);
+  font-size:clamp(24px,2.5vw,32px);
+  line-height:1.2;
+  letter-spacing:-.035em;
+  font-weight:750;
+}
+#technologySelectionPage .domain-intro p{
+  margin:0;
+  color:var(--tech-muted);
+  font-size:14px;
+  line-height:1.55;
+}
+.technology-groups{display:grid;gap:14px;max-width:1440px;margin:0 auto}
+.technology-group{
+  background:#fff;
+  border:1px solid var(--tech-line);
+  border-radius:13px;
+  padding:17px 18px 18px;
+  box-shadow:0 2px 8px rgba(24,59,43,.035);
+}
+.technology-group h2{
+  display:flex;
+  align-items:center;
+  gap:9px;
+  margin:0 0 13px;
+  color:var(--tech-ink);
+  font-size:15px;
+  line-height:1.35;
+  font-weight:720;
+  letter-spacing:-.01em;
+}
+.technology-group h2:before{
+  content:"";
+  width:3px;
+  height:17px;
+  border-radius:3px;
+  background:#4d9870;
+  flex:0 0 3px;
+}
+.technology-items{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(min(100%,235px),1fr));
+  gap:9px;
+}
+.technology-item{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  min-width:0;
+  min-height:48px;
+  padding:9px 12px;
+  border:1px solid #e1e9e3;
+  border-radius:9px;
+  background:#fff;
+  transition:border-color .15s ease,background .15s ease,box-shadow .15s ease;
+}
+.technology-item:hover{
+  border-color:#a9c8b4;
+  background:#fbfdfb;
+}
+.technology-item.selected{
+  border-color:#8fb79d;
+  background:#f2f8f4;
+}
+.technology-item input[type="checkbox"]{
+  appearance:none;
+  -webkit-appearance:none;
+  display:grid;
+  place-content:center;
+  width:18px;
+  height:18px;
+  flex:0 0 18px;
+  margin:0;
+  border:1.5px solid #aebdb2;
+  border-radius:5px;
+  background:#fff;
+  cursor:pointer;
+  transition:background .15s ease,border-color .15s ease;
+}
+.technology-item input[type="checkbox"]:checked{
+  border-color:var(--tech-green);
+  background:var(--tech-green);
+}
+.technology-item input[type="checkbox"]:checked:before{
+  content:"";
+  width:8px;
+  height:4px;
+  border:2px solid #fff;
+  border-top:0;
+  border-right:0;
+  transform:rotate(-45deg) translateY(-1px);
+}
+.technology-item input[type="checkbox"]:focus-visible{
+  outline:3px solid rgba(40,115,75,.18);
+  outline-offset:2px;
+}
+.technology-item-name{
+  flex:1;
+  min-width:0;
+  color:#294638;
+  font-size:13px;
+  line-height:1.4;
+  font-weight:560;
+  overflow-wrap:anywhere;
+}
+.technology-item input.technology-item-name{
+  display:block;
+  flex:1 1 auto;
+  width:100%;
+  min-width:80px;
+  height:36px;
+  box-sizing:border-box;
+  padding:7px 9px;
+  border:1px solid #d7e3da;
+  border-radius:7px;
+  background:#fff;
+  color:var(--tech-ink);
+  font:600 13px/1.3 inherit;
+  outline:none;
+}
+.technology-item input.technology-item-name:focus{
+  border-color:#6d9b7c;
+  box-shadow:0 0 0 3px rgba(109,155,124,.13);
+}
+.technology-item-actions{
+  display:flex;
+  align-items:center;
+  gap:6px;
+  flex:0 0 auto;
+}
+.technology-item-actions button{
+  border:1px solid #dce7df;
+  background:#fff;
+  color:#456653;
+  padding:7px 10px;
+  cursor:pointer;
+  border-radius:7px;
+  font-size:12px;
+  line-height:1.2;
+  font-weight:600;
+  white-space:nowrap;
+  transition:background .15s ease,border-color .15s ease;
+}
+.technology-item-actions button:hover{
+  background:#edf5ef;
+  border-color:#b8cebf;
+}
+.technology-footer{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  flex-wrap:wrap;
+  max-width:1440px;
+  margin:17px auto 0;
+  padding:13px 15px;
+  border:1px solid var(--tech-line);
+  border-radius:11px;
+  background:#fff;
+}
+.technology-count{
+  margin-right:auto;
+  color:var(--tech-muted);
+  font-size:13px;
+  font-weight:650;
+}
+.technology-footer .btn{
+  min-height:39px;
+  border-radius:8px;
+}
+.unit-cards-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(min(100%,230px),1fr));
+  gap:12px;
+  max-width:1440px;
+  margin:0 auto;
+}
+.unit-process-card{
+  display:flex;
+  flex-direction:column;
+  gap:9px;
+  text-align:left;
+  padding:17px;
+  border:1px solid var(--tech-line);
+  border-radius:11px;
+  background:#fff;
+  cursor:pointer;
+  color:var(--tech-ink);
+  min-width:0;
+  box-shadow:0 2px 8px rgba(24,59,43,.03);
+  transition:border-color .15s ease,box-shadow .15s ease,transform .15s ease;
+}
+.unit-process-card:hover{
+  border-color:#9cbea8;
+  box-shadow:0 5px 16px rgba(24,59,43,.07);
+  transform:translateY(-1px);
+}
+.unit-process-card strong{font-size:15px;overflow-wrap:anywhere}
+.unit-process-card .unit-status{font-size:12px;color:var(--tech-muted)}
+.unit-process-card .unit-status.done{color:var(--tech-green);font-weight:700}
+#technologySelectionPage .domain-intro,
+#unitCardsPage .domain-intro{padding-top:3px}
+@media(max-width:760px){
+  #technologySelectionPage{padding:16px}
+  .technology-group{padding:14px}
+  .technology-items{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .technology-footer{padding:12px}
+}
+@media(max-width:560px){
+  #technologySelectionPage{padding:12px}
+  #technologySelectionPage .domain-intro{margin-bottom:17px}
+  .technology-items,.unit-cards-grid{grid-template-columns:minmax(0,1fr)}
+  .technology-group{padding:13px;border-radius:11px}
+  .technology-item{min-height:46px;padding:8px 10px}
+  .technology-item.selected{flex-wrap:wrap}
+  .technology-item.selected input.technology-item-name{flex:1 1 100%;order:0}
+  .technology-item.selected .technology-item-actions{width:100%;justify-content:flex-end}
+  .technology-footer{align-items:stretch;gap:8px}
+  .technology-count{width:100%;margin:0 0 2px}
+  .technology-footer .btn{width:100%}
+}
+
+
+/* ECS V36 — top-positioned back navigation; no continue action */
+.technology-topbar{
+  width:100%;
+  max-width:1440px;
+  margin:0 auto 12px;
+  display:flex;
+  justify-content:flex-start;
+}
+.technology-topbar .back-button{
+  min-width:112px;
+  min-height:38px;
+}
+@media(max-width:560px){
+  .technology-topbar{margin-bottom:10px}
+  .technology-topbar .back-button{width:auto;min-width:108px}
+}
+
+/* ECS V37 — matching back actions at both top and bottom */
+.technology-bottom-back{
+  min-width:112px;
+  min-height:38px;
+}
+@media(max-width:560px){
+  .technology-bottom-back{width:100%;min-width:0}
+}
+
+/* ECS V38 — unified visual refinement for technology selection */
+#technologySelectionPage{
+  --tech-bg:#f1f5f2;
+  --tech-surface:#ffffff;
+  --tech-border:#d8e2db;
+  --tech-border-strong:#b8cdbf;
+  --tech-ink:#203b2e;
+  --tech-muted:#718078;
+  --tech-green:#176b45;
+  --tech-green-hover:#105a39;
+  padding:clamp(14px,2vw,26px);
+  background:var(--tech-bg);
+}
+#technologySelectionPage .technology-topbar,
+#technologySelectionPage .technology-groups,
+#technologySelectionPage .technology-footer{
+  width:100%;
+  max-width:1240px;
+}
+#technologySelectionPage .technology-topbar{
+  margin:0 auto 14px;
+}
+#technologySelectionPage .domain-intro{
+  max-width:760px;
+  margin:0 auto 22px;
+  text-align:center;
+}
+#technologySelectionPage .domain-intro h1{
+  color:var(--tech-ink);
+  font-size:clamp(23px,2.2vw,30px);
+  font-weight:730;
+  letter-spacing:-.025em;
+  line-height:1.22;
+  margin:0 0 7px;
+}
+#technologySelectionPage .domain-intro p{
+  color:var(--tech-muted);
+  font-size:14px;
+  line-height:1.5;
+  margin:0;
+}
+#technologySelectionPage .technology-groups{gap:13px}
+#technologySelectionPage .technology-group{
+  padding:16px 17px 17px;
+  border:1px solid var(--tech-border);
+  border-radius:12px;
+  background:var(--tech-surface);
+  box-shadow:0 2px 7px rgba(28,58,42,.035);
+}
+#technologySelectionPage .technology-group h2{
+  color:var(--tech-ink);
+  font-size:15px;
+  font-weight:700;
+  margin:0 0 12px;
+}
+#technologySelectionPage .technology-group h2:before{
+  height:16px;
+  background:#438b64;
+}
+#technologySelectionPage .technology-items{
+  grid-template-columns:repeat(auto-fit,minmax(min(100%,245px),1fr));
+  gap:8px 9px;
+}
+#technologySelectionPage .technology-item{
+  min-height:46px;
+  padding:8px 11px;
+  gap:10px;
+  border:1px solid #e0e8e2;
+  border-radius:8px;
+  background:#fff;
+}
+#technologySelectionPage .technology-item:hover{
+  border-color:#b4cbbb;
+  background:#fbfdfb;
+}
+#technologySelectionPage .technology-item.selected{
+  border-color:#9bbba5;
+  background:#f2f7f3;
+}
+#technologySelectionPage .technology-item-name{
+  color:#294638;
+  font-size:13px;
+  font-weight:560;
+}
+#technologySelectionPage .technology-item input[type="checkbox"]{
+  width:18px;
+  height:18px;
+  flex-basis:18px;
+  border-radius:4px;
+  border-color:#aab9ae;
+}
+#technologySelectionPage .technology-item input[type="checkbox"]:checked{
+  background:var(--tech-green);
+  border-color:var(--tech-green);
+}
+#technologySelectionPage .technology-item input.technology-item-name{
+  height:38px;
+  padding:8px 10px;
+  border-color:#d7e2da;
+  border-radius:7px;
+  color:var(--tech-ink);
+  font-family:inherit;
+  font-size:13px;
+}
+#technologySelectionPage .technology-item-actions{gap:6px}
+#technologySelectionPage .technology-item-actions button{
+  min-height:34px;
+  padding:7px 10px;
+  border:1px solid #d7e2da;
+  border-radius:7px;
+  background:#fff;
+  color:#3f634d;
+  font-family:inherit;
+  font-size:12px;
+  font-weight:600;
+}
+#technologySelectionPage .technology-item-actions button:hover{
+  border-color:#adc6b5;
+  background:#edf5ef;
+}
+#technologySelectionPage .technology-footer{
+  margin:14px auto 0;
+  padding:12px 14px;
+  gap:10px;
+  border:1px solid var(--tech-border);
+  border-radius:10px;
+  background:#fff;
+  box-shadow:0 2px 7px rgba(28,58,42,.025);
+}
+#technologySelectionPage .technology-count{
+  color:#687970;
+  font-size:13px;
+  font-weight:650;
+}
+#technologySelectionPage .technology-topbar .back-button,
+#technologySelectionPage .technology-bottom-back{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  min-width:116px;
+  min-height:38px;
+  padding:8px 14px;
+  border:1px solid #cbd9d0;
+  border-radius:7px;
+  background:#f4f8f5;
+  color:#315b42;
+  font-family:inherit;
+  font-size:13px;
+  font-weight:650;
+  line-height:1.2;
+  box-shadow:none;
+}
+#technologySelectionPage .technology-topbar .back-button:hover,
+#technologySelectionPage .technology-bottom-back:hover{
+  border-color:#a9c1b0;
+  background:#eaf2ed;
+  color:#244b34;
+}
+#technologySelectionPage .technology-topbar .back-button:focus-visible,
+#technologySelectionPage .technology-bottom-back:focus-visible{
+  outline:2px solid #6b9b7c;
+  outline-offset:2px;
+}
+@media(max-width:760px){
+  #technologySelectionPage{padding:14px}
+  #technologySelectionPage .technology-group{padding:14px}
+  #technologySelectionPage .technology-items{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+  }
+}
+@media(max-width:560px){
+  #technologySelectionPage{padding:11px}
+  #technologySelectionPage .domain-intro{margin-bottom:17px}
+  #technologySelectionPage .technology-items{grid-template-columns:minmax(0,1fr)}
+  #technologySelectionPage .technology-group{padding:13px;border-radius:10px}
+  #technologySelectionPage .technology-item{min-height:45px;padding:8px 10px}
+  #technologySelectionPage .technology-item.selected{flex-wrap:wrap}
+  #technologySelectionPage .technology-item.selected input.technology-item-name{
+    flex:1 1 100%;
+    order:0;
+  }
+  #technologySelectionPage .technology-item.selected .technology-item-actions{
+    width:100%;
+    justify-content:flex-end;
+  }
+  #technologySelectionPage .technology-footer{
+    align-items:stretch;
+    gap:9px;
+    padding:12px;
+  }
+  #technologySelectionPage .technology-count{width:100%;margin:0 0 2px}
+  #technologySelectionPage .technology-bottom-back{width:100%;min-width:0}
+  #technologySelectionPage .technology-topbar .back-button{width:auto;min-width:116px}
+}
+
+/* ECS V39 — semantic colors for duplicate and delete actions */
+#technologySelectionPage .technology-item-actions .technology-action-duplicate{
+  color:#236443;
+  background:#eaf4ed;
+  border:1px solid #c7ddce;
+}
+#technologySelectionPage .technology-item-actions .technology-action-duplicate:hover{
+  color:#174f32;
+  background:#dceee2;
+  border-color:#a9cbb4;
+}
+#technologySelectionPage .technology-item-actions .technology-action-delete{
+  color:#a33d38;
+  background:#fff3f2;
+  border:1px solid #edcfcc;
+}
+#technologySelectionPage .technology-item-actions .technology-action-delete:hover{
+  color:#842c28;
+  background:#fde7e5;
+  border-color:#e2b5b1;
+}
+#technologySelectionPage .technology-item-actions button:focus-visible{
+  outline:2px solid currentColor;
+  outline-offset:2px;
+}
+
+/* ECS V40 — responsive delete confirmation dialog */
+#ecsTechnologyConfirm button{
+  white-space:normal;
+  overflow-wrap:anywhere;
+  font-family:inherit;
+}
+@media(max-width:380px){
+  #ecsTechnologyConfirm{padding:12px!important}
+  #ecsTechnologyConfirm section{padding:19px!important;border-radius:13px!important}
+  #ecsTechnologyConfirm section>div:last-child{gap:8px!important}
+  #ecsTechnologyConfirm section>div:last-child button{padding:9px 8px!important;font-size:13px!important}
+}
+
+/* ECS V41 — detailed unit calculation workspace */
+.ecs-unit-choice-grid{display:grid;grid-template-columns:1fr;gap:14px;margin:0 0 18px}
+.ecs-unit-choice{display:flex;align-items:flex-start;gap:16px;width:100%;box-sizing:border-box;text-align:left;border:1px solid #d4ddd7;border-radius:16px;background:#fff;color:#263a30;padding:20px 18px;min-height:126px;box-shadow:0 3px 12px #1d38220a;cursor:pointer;transition:border-color .15s,background .15s,box-shadow .15s}
+.ecs-unit-choice:hover,.ecs-unit-choice:focus-visible{border-color:#8caf99;box-shadow:0 4px 14px #1d382215;outline:none}
+.ecs-choice-icon{display:grid;place-items:center;flex:0 0 64px;width:64px;height:64px;border-radius:17px;background:#e4f1e8;color:#244b35;font-size:29px}
+.ecs-choice-copy{display:flex;flex-direction:column;align-items:flex-start;gap:7px;min-width:0}
+.ecs-choice-copy strong{font-size:19px;line-height:1.35;font-weight:700;color:#263a30}
+.ecs-choice-copy small{font-size:14px;line-height:1.5;color:#758078}
+.ecs-choice-action{font-size:14px;font-weight:600;color:#304c3b;margin-top:5px}
+@media(min-width:760px){.ecs-unit-choice-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.ecs-unit-choice{min-height:145px}}
+.ecs-detail-card{background:#fff;border:1px solid #dce6df;border-radius:13px;margin:0 0 14px;overflow:hidden}
+.ecs-detail-card h2{font-size:17px;margin:0;padding:15px 17px;border-bottom:1px solid #e8eee9;color:#244b35}
+.ecs-detail-body{padding:16px}
+.ecs-form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.ecs-form-field{display:flex;flex-direction:column;gap:6px;min-width:0}
+.ecs-form-field label{font-size:13px;font-weight:650;color:#43584b}
+.ecs-form-field input,.ecs-form-field select{width:100%;box-sizing:border-box;border:1px solid #cbd9cf;border-radius:8px;padding:11px 10px;background:#fff;color:#203b2e;font:14px inherit}
+.ecs-field-note,.ecs-muted{font-size:12px;color:#718077;line-height:1.45}
+.ecs-inline-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+.ecs-inline-actions button,.ecs-formula-link{border:1px solid #cbdccf;border-radius:8px;padding:9px 12px;background:#f4f8f5;color:#315b42;font-weight:650;cursor:pointer}
+.ecs-result-table{width:100%;border-collapse:collapse}
+.ecs-result-table th,.ecs-result-table td{padding:10px 9px;border-bottom:1px solid #e7eee9;text-align:left;font-size:13px}
+.ecs-result-table th{background:#f5f8f5;color:#43584b}
+.ecs-result-table td.num{text-align:right;font-variant-numeric:tabular-nums}
+.ecs-status-note{padding:11px 13px;border-radius:9px;background:#f1f7f2;color:#315b42;font-size:13px;margin:10px 0}
+.ecs-status-note.warn{background:#fff6e8;color:#805b20}
+.ecs-status-note.error{background:#fff0ef;color:#9b3732}
+.ecs-formula-dialog{position:fixed;inset:0;z-index:200010;background:#15271f88;display:grid;place-items:center;padding:16px}
+.ecs-formula-dialog>div{width:min(620px,100%);max-height:85vh;overflow:auto;background:white;border-radius:14px;padding:20px;box-shadow:0 18px 60px #0003}
+.ecs-formula-dialog h3{margin:0 0 12px;color:#244b35}
+.ecs-equipment-empty{padding:22px;border:1px dashed #cbd9cf;border-radius:10px;color:#68786e;text-align:center;background:#fafcfb}
+@media(max-width:600px){.ecs-unit-choice{padding:17px 15px;gap:14px;min-height:118px}.ecs-choice-icon{flex-basis:58px;width:58px;height:58px;font-size:26px}.ecs-choice-copy strong{font-size:18px}.ecs-choice-copy small{font-size:13px}.ecs-form-grid{grid-template-columns:1fr}.ecs-detail-body{padding:12px}}
+
+/* ECS V49 — compact horizontal process tabs */
+.ecs-unit-tabs{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;margin:0 0 16px}
+.ecs-unit-tabs button{min-width:0;border:1px solid #d5e1d8;border-radius:10px;background:#f5f8f5;color:#385846;padding:12px 5px;font:650 14px inherit;cursor:pointer;white-space:normal}
+.ecs-unit-tabs button.active{background:#e5f2e9;border-color:#79a98a;color:#205d38}
+@media(max-width:480px){.ecs-unit-tabs{gap:4px}.ecs-unit-tabs button{font-size:12px;padding:11px 2px;border-radius:8px}}
+
+/* ECS V51 — selected process card design summary */
+.unit-process-summary{display:grid;gap:7px;margin:12px 0 4px;padding:11px 12px;border-radius:10px;background:#f5f8f5;text-align:left}
+.unit-summary-line{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;font-size:13px;line-height:1.4;color:#68766d}
+.unit-summary-line strong{color:#294b37;font-weight:650;text-align:right;font-variant-numeric:tabular-nums}
+@media(max-width:480px){.unit-summary-line{font-size:12px;gap:8px}.unit-process-summary{padding:10px}}
+
+/* ECS V53 — prevent hidden inspector column and isolate responsive table rules */
+.workspace:has(> #inspector.hidden){grid-template-columns:minmax(0,1fr)}
+.workspace:has(> #inspector.hidden) > .center{grid-column:1/-1}
+.ecs-result-table{width:100%;table-layout:fixed}
+.ecs-result-table th:first-child,.ecs-result-table td:first-child{width:64%;text-align:left}
+.ecs-result-table th:last-child,.ecs-result-table td:last-child{width:36%;text-align:right}
+@media(max-width:520px){
+  .ecs-result-table thead{display:table-header-group}
+  .ecs-result-table tbody{display:table-row-group}
+  .ecs-result-table tbody tr{display:table-row;padding:0;border:0}
+  .ecs-result-table tbody td{display:table-cell;width:auto!important;padding:9px 7px;border-bottom:1px solid #e7eee9;text-align:inherit!important;font-size:12px}
+  .ecs-result-table tbody td:first-child{font-weight:400;color:inherit}
+  .ecs-result-table tbody td:nth-child(2)::before,.ecs-result-table tbody td:nth-child(3)::before{content:none}
+}
+
+/* ECS V54 — emphasize the four detail navigation tabs */
+.ecs-unit-tabs{
+  gap:8px;
+  margin:0 0 18px;
+  padding:7px;
+  border:1px solid #c7d9cc;
+  border-radius:14px;
+  background:#e1ebe4;
+}
+.ecs-unit-tabs button{
+  min-height:52px;
+  padding:12px 8px;
+  border:1.5px solid #a9c5b2;
+  border-radius:10px;
+  background:#fff;
+  color:#28583b;
+  font-size:15px;
+  font-weight:700;
+  box-shadow:0 2px 5px rgba(28,75,47,.08);
+  transition:background .15s ease,border-color .15s ease,box-shadow .15s ease,transform .15s ease;
+}
+.ecs-unit-tabs button:hover{
+  background:#edf6f0;
+  border-color:#4f9568;
+  box-shadow:0 3px 8px rgba(28,75,47,.13);
+}
+.ecs-unit-tabs button.active{
+  background:#236b43;
+  border:1.5px solid #185535;
+  color:#fff;
+  box-shadow:0 3px 8px rgba(25,83,51,.24);
+}
+.ecs-unit-tabs button:focus-visible{
+  outline:3px solid #e0ad36;
+  outline-offset:2px;
+}
+@media(max-width:480px){
+  .ecs-unit-tabs{gap:5px;padding:5px;border-radius:12px}
+  .ecs-unit-tabs button{min-height:48px;padding:10px 3px;font-size:13px;border-radius:8px}
+}
+
+/* ECS V55 — rebalance detail tab proportions */
+.ecs-unit-tabs{
+  gap:6px;
+  margin:0 0 16px;
+  padding:4px;
+  border:1px solid #d5e1d8;
+  border-radius:11px;
+  background:#e8f0eb;
+}
+.ecs-unit-tabs button{
+  min-height:42px;
+  padding:9px 5px;
+  border:1px solid #c7d8cc;
+  border-radius:8px;
+  background:#f8faf8;
+  color:#385846;
+  font-size:14px;
+  font-weight:600;
+  box-shadow:none;
+}
+.ecs-unit-tabs button:hover{
+  background:#edf5ef;
+  border-color:#8eaf99;
+  box-shadow:none;
+}
+.ecs-unit-tabs button.active{
+  background:#dceee2;
+  border:1.5px solid #5c9870;
+  color:#205d38;
+  box-shadow:inset 0 0 0 1px rgba(55,116,75,.08);
+}
+@media(max-width:480px){
+  .ecs-unit-tabs{gap:4px;padding:3px;border-radius:9px}
+  .ecs-unit-tabs button{min-height:40px;padding:8px 2px;font-size:12px;border-radius:7px}
+}
+
+/* ECS V56 — refined unit-card visual hierarchy */
+#unitCardsPage{
+  padding:clamp(18px,2.4vw,30px);
+  background:#edf3ef;
+}
+#unitCardsPage .domain-intro{
+  max-width:820px;
+  margin:0 auto 24px;
+  text-align:center;
+}
+#unitCardsPage .domain-intro h1{
+  margin:0 0 8px;
+  color:#193d2c;
+  font-size:clamp(23px,2.4vw,30px);
+  line-height:1.2;
+  letter-spacing:-.025em;
+  font-weight:750;
+}
+#unitCardsPage .domain-intro p{
+  margin:0;
+  color:#728077;
+  font-size:14px;
+  line-height:1.55;
+}
+.unit-cards-grid{
+  grid-template-columns:repeat(auto-fit,minmax(min(100%,250px),1fr));
+  align-items:stretch;
+  gap:14px;
+  max-width:1440px;
+}
+.unit-process-card{
+  position:relative;
+  gap:10px;
+  min-height:150px;
+  padding:18px;
+  border:1px solid #dce7df;
+  border-radius:15px;
+  background:linear-gradient(180deg,#fff 0%,#fcfefd 100%);
+  box-shadow:0 3px 12px rgba(28,65,43,.045);
+}
+.unit-process-card:hover{
+  border-color:#9cbea8;
+  background:#fff;
+  box-shadow:0 7px 20px rgba(28,65,43,.09);
+  transform:translateY(-2px);
+}
+.unit-process-card>strong{
+  color:#203f2e;
+  font-size:16px;
+  line-height:1.35;
+  font-weight:720;
+}
+.unit-process-card>.unit-status{
+  display:inline-flex;
+  align-self:flex-start;
+  align-items:center;
+  min-height:23px;
+  padding:3px 9px;
+  border-radius:20px;
+  background:#f0f3f1;
+  color:#66756b;
+  font-size:11px;
+  font-weight:650;
+}
+.unit-process-card>.unit-status.done{
+  background:#e7f3ea;
+  color:#287047;
+}
+.unit-process-summary{
+  gap:8px;
+  margin:3px 0 2px;
+  padding:12px 13px;
+  border:1px solid #e8eee9;
+  border-radius:11px;
+  background:#f6f9f7;
+}
+.unit-summary-line{
+  display:grid;
+  grid-template-columns:minmax(0,88px) minmax(0,1fr);
+  align-items:start;
+  gap:8px;
+  font-size:12px;
+  line-height:1.45;
+}
+.unit-summary-line strong{
+  color:#244b35;
+  font-size:13px;
+  line-height:1.4;
+  font-weight:700;
+  overflow-wrap:anywhere;
+}
+.unit-process-card> .unit-status:last-child{
+  margin-top:auto;
+  padding:0;
+  min-height:0;
+  border-radius:0;
+  background:transparent;
+  color:#477454;
+  font-size:12px;
+  font-weight:650;
+}
+#unitCardsPage .domain-empty-actions{
+  max-width:1440px;
+  margin:20px auto 0;
+}
+@media(max-width:760px){
+  #unitCardsPage{padding:17px 14px}
+  #unitCardsPage .domain-intro{margin-bottom:18px}
+  .unit-cards-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+  .unit-process-card{min-height:140px;padding:14px;border-radius:13px}
+  .unit-process-card>strong{font-size:14px}
+  .unit-process-summary{padding:10px;gap:7px}
+  .unit-summary-line{grid-template-columns:minmax(0,1fr);gap:1px}
+  .unit-summary-line strong{text-align:left;font-size:12px}
+}
+@media(max-width:520px){
+  .unit-cards-grid{grid-template-columns:minmax(0,1fr);gap:10px}
+  .unit-process-card{min-height:0;padding:15px}
+  .unit-summary-line{grid-template-columns:minmax(0,88px) minmax(0,1fr);gap:8px}
+  .unit-summary-line strong{text-align:right}
+}
+
+/* ECS V59 — polished selectable design-field chips */
+.project-fields .design-fields-field{grid-column:1/-1}
+.design-fields-options{
+  display:flex;
+  flex-wrap:wrap;
+  align-items:center;
+  gap:9px;
+  margin-top:9px;
+}
+.design-field-option{
+  position:relative;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  min-height:40px;
+  padding:9px 15px;
+  border:1px solid #d3dfd7;
+  border-radius:10px;
+  background:#f8faf8;
+  color:#42594a;
+  font-size:13px;
+  font-weight:600;
+  line-height:1.25;
+  cursor:pointer;
+  user-select:none;
+  transition:background .15s ease,border-color .15s ease,box-shadow .15s ease,color .15s ease;
+}
+.design-field-option input{
+  position:absolute;
+  width:1px;
+  height:1px;
+  opacity:0;
+  pointer-events:none;
+}
+.design-field-option:has(input:checked){
+  border-color:#43845b;
+  background:#e7f3ea;
+  color:#1e653b;
+  box-shadow:inset 0 0 0 1px rgba(41,111,65,.12);
+}
+.design-field-option:has(input:focus-visible){
+  outline:3px solid rgba(43,119,70,.25);
+  outline-offset:2px;
+}
+.design-field-option:hover{
+  border-color:#8caf98;
+  background:#f0f6f1;
+}
+.design-field-option:has(input:checked):hover{background:#deeee3}
+.design-field-option span{white-space:nowrap}
+@media(max-width:650px){
+  .design-fields-options{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+  .design-field-option{width:100%;min-height:42px;padding:9px 8px;text-align:center}
+  .design-field-option span{white-space:normal}
+}
+
+/* ECS V60 — Tải lượng uses compact horizontal tabs */
+.workspace{display:block}
+.load-workspace-heading{max-width:1200px;margin:0 auto 16px;width:100%;padding:0 12px}
+.load-workspace-heading .domain-intro{text-align:left;margin:0 0 14px}
+.load-workspace-heading .domain-intro h1{margin-bottom:5px}
+.load-unit-tabs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));max-width:560px;margin:0 0 16px}
+.load-unit-tabs button{min-height:42px;padding:9px 12px;border:1px solid #c7d8cc;border-radius:8px;background:#f8faf8;color:#385846;font-size:14px;font-weight:600}
+.load-unit-tabs button.active{background:#dceee2;border:1.5px solid #5c9870;color:#205d38}
+.workspace>.center,.workspace>.right{width:100%;min-width:0}
+@media(max-width:650px){
+ .load-workspace-heading{padding:0 8px}
+ .load-unit-tabs{width:100%;gap:5px}
+ .load-unit-tabs button{min-height:40px;padding:8px 5px;font-size:13px}
+}
+
+/* ECS V62 — balanced loading workspace header and single back action */
+.workspace{display:block;min-width:0}
+.load-workspace-heading{
+  width:100%;max-width:1200px;margin:0 auto 16px;padding:22px clamp(14px,2vw,24px) 16px;
+  background:linear-gradient(135deg,#f2f7f3 0%,#e8f0eb 100%);
+  border:1px solid #d7e3da;border-radius:14px;
+  box-shadow:0 2px 8px rgba(30,67,44,.035);
+}
+.load-workspace-heading .domain-intro{max-width:none;text-align:left;margin:0 0 16px}
+.load-workspace-heading .domain-intro h1{margin:0 0 5px;font-size:clamp(22px,2.3vw,28px);line-height:1.25;color:#203f2e}
+.load-workspace-heading .domain-intro p{margin:0;color:#718077;font-size:14px}
+.load-unit-tabs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;width:100%;max-width:760px;margin:0 0 13px;padding:4px;border:1px solid #d3e0d7;border-radius:11px;background:#e3ece6}
+.load-unit-tabs button{min-height:42px;padding:9px 14px;border:1px solid #cbdacf;border-radius:8px;background:#fbfdfb;color:#45604e;font-size:14px;font-weight:650}
+.load-unit-tabs button.active{background:#dceee2;border:1.5px solid #5c9870;color:#205d38;box-shadow:inset 0 0 0 1px rgba(55,116,75,.06)}
+.load-back-action{display:flex;justify-content:flex-start}
+.load-back-action .back-button{min-height:38px;padding:8px 15px;font-size:13px}
+.workspace>.center,.workspace>.right{width:100%;min-width:0}
+.workspace>.center{padding:0 clamp(10px,1.4vw,16px) 14px}
+.workspace>.right{padding:0 clamp(10px,1.4vw,16px) 14px;background:transparent;border:0}
+.workspace>.right>section{max-width:1200px;margin:0 auto}
+.workspace>.center>.panel{max-width:1200px;width:100%;margin:0 auto}
+@media(max-width:650px){
+ .load-workspace-heading{padding:17px 13px 13px;border-radius:11px;margin-bottom:12px}
+ .load-workspace-heading .domain-intro{margin-bottom:12px}
+ .load-unit-tabs{gap:5px;margin-bottom:11px}
+ .load-unit-tabs button{min-height:40px;padding:8px 5px;font-size:13px}
+ .load-back-action .back-button{min-height:38px;width:auto}
+ .workspace>.center,.workspace>.right{padding:0 9px 12px}
+}
+
+/* ECS V63 — align loading back buttons with technology selection */
+.load-workspace-topbar{
+  width:100%;max-width:1440px;margin:0 auto 12px;
+  display:flex;justify-content:flex-start;padding:0 clamp(14px,2vw,24px);
+}
+.load-workspace-topbar .back-button,
+.load-workspace-bottom .back-button{
+  min-width:112px;min-height:38px;
+}
+.load-workspace-heading{margin-top:0}
+.load-workspace-bottom{
+  width:100%;max-width:1440px;margin:14px auto 18px;
+  padding:0 clamp(14px,2vw,24px);
+  display:flex;justify-content:flex-start;
+}
+@media(max-width:560px){
+  .load-workspace-topbar{margin-bottom:10px;padding:0 13px}
+  .load-workspace-topbar .back-button{width:auto;min-width:108px}
+  .load-workspace-bottom{margin:12px auto 16px;padding:0 13px}
+  .load-workspace-bottom .back-button{width:auto;min-width:108px}
+}
+
+/* ECS V64 — hide the duplicated input-summary accordion above load results.
+   Keep its DOM table available because the existing calculation renderer populates it. */
+#inputReview{display:none!important}
+
+/* ECS V65 — ensure hidden workspace never leaks its bottom navigation button */
+.workspace.hidden{display:none!important}
+
+/* ECS V66 — bottom back action is mounted inside the workspace, never on body */
+.workspace .load-workspace-bottom{display:flex;justify-content:flex-start;width:100%;max-width:1440px;margin:14px auto 18px;padding:0 clamp(14px,2vw,24px)}
+.workspace.hidden .load-workspace-bottom{display:none!important}
+
+/* ECS V67 — two-column load calculation results table */
+.load-results-table{width:100%;table-layout:fixed}
+.load-results-table th:first-child,.load-results-table td:first-child{width:68%;text-align:left}
+.load-results-table th:last-child,.load-results-table td:last-child{width:32%;text-align:right}
+@media(max-width:520px){
+ .load-results-table thead{display:table-header-group}
+ .load-results-table tbody{display:table-row-group}
+ .load-results-table tbody tr{display:table-row;padding:0;border:0}
+ .load-results-table tbody td{display:table-cell;width:auto!important;padding:9px 8px;border-bottom:1px solid #e3e9e4;text-align:inherit!important}
+ .load-results-table tbody td:first-child{font-weight:500;color:inherit}
+ .load-results-table tbody td:last-child{text-align:right!important;font-variant-numeric:tabular-nums}
+}
+
+/* ECS V69 — remove orphaned third result cells after deleting the input-data column */
+.load-results-table thead th:nth-child(n+3),
+.load-results-table tbody td:nth-child(n+3){display:none!important}
+.load-results-table tbody tr{grid-template-columns:minmax(0,68%) minmax(0,32%)}
+.load-results-table tbody td:nth-child(2){text-align:right!important}
+.load-results-table tbody td:nth-child(2)::before{content:none!important}
+
+
+/* ECS V72 — unified green UI system; presentation-only overrides */
+:root{
+ --app:#f2f6f3;--panel:#fff;--ink:#20342b;--muted:#64756b;--line:#d7e2da;
+ --green:#176b45;--green-soft:#e5f2e9;--blue:#eaf2f8;--amber:#fff4d7;
+ --shadow:0 2px 10px #173d2710;--r:10px;--ecs-content-width:1200px;
+ --ecs-space:14px;--ecs-control-height:42px;
+}
+html{background:var(--app)}
+body{background:var(--app);font-family:"Segoe UI",Arial,sans-serif;font-size:14px;line-height:1.45}
+button,input,select,textarea{font:inherit}
+button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,[tabindex]:focus-visible{outline:3px solid #69a987;outline-offset:2px}
+.top{background:#fff}
+.titlebar{min-height:54px;height:auto;padding:8px max(14px,calc((100vw - var(--ecs-content-width))/2));gap:12px}
+.menubar{padding-left:max(10px,calc((100vw - var(--ecs-content-width))/2));padding-right:max(10px,calc((100vw - var(--ecs-content-width))/2));background:#fff}
+.ecs-mobile-menu-toggle{display:none;align-items:center;justify-content:center;gap:7px;margin-left:auto;border:1px solid var(--line);border-radius:8px;background:#fff;color:var(--green);padding:8px 12px;font-weight:700}
+.home-page,.project-page,.domain-page,.wastewater-tools-page,.domain-empty,.workspace{width:100%;max-width:var(--ecs-content-width);margin-left:auto;margin-right:auto}
+.home-page{max-width:var(--ecs-content-width)}
+.project-page{display:block;max-width:var(--ecs-content-width);padding:16px}
+.project-page-main,.project-page-properties{width:100%;max-width:100%}
+.workspace{display:block;max-width:var(--ecs-content-width);padding:14px;min-width:0}
+.center,.right{width:100%;max-width:100%;min-width:0;border:0;padding:0}
+.right{margin-top:16px;border-top:1px solid var(--line);padding-top:14px}
+.panel,.home-hero,.home-projects-panel,.project-modal,.ece-domain,.saved-project-card{border-radius:12px}
+.btn{min-height:38px;border-radius:8px}
+input:not([type=checkbox]):not([type=radio]),select,textarea{min-height:var(--ecs-control-height);border-radius:8px}
+.field label{font-size:13px}
+/* All content regions share the same single-column width. */
+.domain-page,.wastewater-tools-page,.domain-empty{padding-left:16px;padding-right:16px}
+@media(max-width:760px){
+ .titlebar{padding:8px 12px;min-height:52px;flex-wrap:nowrap}
+ .ecs-mobile-menu-toggle{display:inline-flex}
+ .menubar{display:none;height:auto;min-height:0;flex-direction:column;align-items:stretch;padding:7px 10px;border-top:1px solid var(--line)}
+ .top.ecs-menu-open .menubar{display:flex}
+ .menuwrap{display:block;width:100%}
+ .menuitem{display:block;width:100%;min-height:42px;text-align:left;padding:9px 12px;border:0;border-radius:7px}
+ .menuwrap.open .dropdown{position:static;width:100%;min-width:0;border:0;border-radius:8px;box-shadow:none;background:#f5f9f6;padding:5px 8px;margin:2px 0 7px}
+ .project-page{padding:10px}
+ .workspace{padding:10px}
+ .center,.right{padding:0}
+ .statusbar{height:auto;min-height:30px;flex-wrap:wrap;gap:6px 12px;padding:6px 10px}
+}
+@media(max-width:600px){
+ /* Table rows become individual cards; labels are populated from table headers. */
+ table.ecs-mobile-card-table,table.ecs-mobile-card-table tbody,table.ecs-mobile-card-table tr,table.ecs-mobile-card-table td{display:block;width:100%}
+ table.ecs-mobile-card-table{border:0!important;border-collapse:separate!important;border-spacing:0 9px!important;background:transparent!important}
+ table.ecs-mobile-card-table thead{position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;overflow:hidden!important;clip:rect(0,0,0,0)!important;white-space:nowrap!important;border:0!important}
+ table.ecs-mobile-card-table tbody tr{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px 12px;padding:12px;background:#fff;border:1px solid var(--line);border-radius:10px;box-shadow:var(--shadow);margin:0 0 9px}
+ table.ecs-mobile-card-table tbody td{min-width:0;padding:3px 0!important;border:0!important;text-align:left!important;white-space:normal!important;overflow-wrap:anywhere}
+ table.ecs-mobile-card-table tbody td:before{content:attr(data-label);display:block;margin-bottom:3px;color:var(--muted);font-size:11px;font-weight:650}
+ table.ecs-mobile-card-table tbody td:first-child{grid-column:1/-1;font-weight:750;color:var(--green)}
+ table.ecs-mobile-card-table tbody td:only-child{grid-column:1/-1}
+ .home-hero{padding:16px}
+}
+
+
+/* ECS V73 acceptance polish: consistent visual hierarchy and accessible responsive states. */
+:root{
+ --ecs-green-900:#164b34;--ecs-green-800:#176b45;--ecs-green-700:#218653;
+ --ecs-green-100:#e7f3eb;--ecs-green-050:#f4f8f5;
+ --ecs-focus:0 0 0 3px rgba(33,134,83,.22);
+}
+body{color:#203128;background:#f2f6f3}
+.top{position:sticky;top:0;z-index:1000;box-shadow:0 2px 12px rgba(22,75,52,.06)}
+.logo,.home-brand-mark{background:linear-gradient(145deg,var(--ecs-green-800),var(--ecs-green-700));color:#fff}
+.appname{color:var(--ecs-green-900)}
+.appname small{color:#64756a}
+.menuitem{transition:background .16s ease,color .16s ease}
+.menuitem:hover,.menuitem.active{background:var(--ecs-green-100);color:var(--ecs-green-900)}
+.dropdown{border:1px solid #dce8df;box-shadow:0 12px 30px rgba(22,75,52,.12)}
+.dropdown button:hover{background:var(--ecs-green-050);color:var(--ecs-green-900)}
+.btn{transition:background .16s ease,border-color .16s ease,box-shadow .16s ease,transform .16s ease}
+.btn:hover{transform:translateY(-1px)}
+.btn.primary{background:var(--ecs-green-800);border-color:var(--ecs-green-800);color:#fff}
+.btn.primary:hover{background:var(--ecs-green-900);border-color:var(--ecs-green-900)}
+.panel,.home-hero,.home-projects-panel,.saved-project-card,.domain-card,.tool-card,.technology-group,.unit-process-card{box-shadow:0 3px 14px rgba(22,75,52,.055)}
+.domain-card,.tool-card{border:1px solid #dce8df;background:#fff;transition:border-color .16s ease,box-shadow .16s ease,transform .16s ease}
+.domain-card:hover,.tool-card:hover{border-color:#8dbda0;box-shadow:0 8px 22px rgba(22,75,52,.10);transform:translateY(-2px)}
+.field input:focus,.field select:focus,.field textarea:focus,input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-visible{outline:none;box-shadow:var(--ecs-focus)}
+.field input,.field select,.field textarea{width:100%;max-width:100%;background:#fff;border:1px solid #d5e0d8}
+.panelhead{border-bottom:1px solid #e6eee8}
+.statusbar{background:#fff;border-top:1px solid #e2ebe4;color:#53675a}
+.hidden{display:none!important}
+.ecs-mobile-menu-toggle{cursor:pointer}
+.ecs-mobile-menu-toggle:hover{background:var(--ecs-green-050)}
+@media(max-width:760px){
+ .top{position:sticky;top:0}
+ .titlebar{gap:8px}
+ .menubar{max-height:calc(100dvh - 64px);overflow-y:auto}
+ .menuwrap.open .dropdown{display:block}
+ .project-page,.workspace,.home-page{padding-left:10px;padding-right:10px}
+ .home-actions,.project-page-actions{display:flex;flex-wrap:wrap;gap:8px}
+ .home-actions .btn,.project-page-actions .btn{flex:1 1 145px}
+ .domain-card,.tool-card{width:100%;min-width:0}
+ .saved-project-card{grid-template-columns:42px minmax(0,1fr)}
+ .saved-project-actions{display:flex;flex-wrap:wrap;gap:6px}
+ .saved-project-actions .btn{flex:1 1 90px}
+}
+@media(max-width:600px){
+ table.ecs-mobile-card-table tbody tr{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+ table.ecs-mobile-card-table tbody td{min-width:0}
+ table.ecs-mobile-card-table tbody td:before{min-height:1em}
+ table.ecs-mobile-card-table tbody td:first-child{grid-column:1/-1}
+}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
+
+/*
+ * ECS V74 — mobile cards for the two Tải lượng tables only.
+ *
+ * V67 deliberately kept .load-results-table in a conventional table layout
+ * below 520px.  This final, locally-scoped override restores the common
+ * card pattern for both Tải lượng tables without changing tables in the
+ * technology or unit-calculation screens.  Labels are taken from the source
+ * table headers by the existing labelTables() routine.
+ */
+@media(max-width:600px){
+  .workspace #inputReview table.data-table.ecs-mobile-card-table,
+  .workspace table.load-results-table.ecs-mobile-card-table{
+    display:table!important;
+    width:100%!important;
+    table-layout:fixed!important;
+    border:0!important;
+    border-collapse:separate!important;
+    border-spacing:0 9px!important;
+    background:transparent!important;
+  }
+  .workspace #inputReview table.data-table.ecs-mobile-card-table thead,
+  .workspace table.load-results-table.ecs-mobile-card-table thead{
+    display:none!important;
+  }
+  .workspace #inputReview table.data-table.ecs-mobile-card-table tbody,
+  .workspace table.load-results-table.ecs-mobile-card-table tbody{
+    display:block!important;
+    width:100%!important;
+  }
+  .workspace #inputReview table.data-table.ecs-mobile-card-table tbody tr,
+  .workspace table.load-results-table.ecs-mobile-card-table tbody tr{
+    display:grid!important;
+    width:100%!important;
+    gap:8px 12px!important;
+    margin:0 0 9px!important;
+    padding:12px!important;
+    background:#fff!important;
+    border:1px solid var(--line)!important;
+    border-radius:10px!important;
+    box-shadow:var(--shadow)!important;
+  }
+  .workspace #inputReview table.data-table.ecs-mobile-card-table tbody td,
+  .workspace table.load-results-table.ecs-mobile-card-table tbody td{
+    display:block!important;
+    width:auto!important;
+    min-width:0!important;
+    padding:3px 0!important;
+    border:0!important;
+    text-align:left!important;
+    white-space:normal!important;
+    overflow-wrap:anywhere!important;
+  }
+  .workspace #inputReview table.data-table.ecs-mobile-card-table tbody td::before,
+  .workspace table.load-results-table.ecs-mobile-card-table tbody td::before{
+    content:attr(data-label)!important;
+    display:block!important;
+    min-height:1em!important;
+    margin-bottom:3px!important;
+    color:var(--muted)!important;
+    font-size:11px!important;
+    font-weight:650!important;
+  }
+
+  /* Đầu vào: Thông số (full row), Kết quả và Số liệu nhập. */
+  .workspace #inputReview table.data-table.ecs-mobile-card-table tbody tr{
+    grid-template-columns:minmax(0,1fr) minmax(0,1fr)!important;
+  }
+  .workspace #inputReview table.data-table.ecs-mobile-card-table tbody td:first-child{
+    grid-column:1 / -1!important;
+    color:var(--ecs-green-900)!important;
+    font-weight:750!important;
+  }
+
+  /* Kết quả: card hai cột rõ ràng — Thông số và Kết quả. */
+  .workspace table.load-results-table.ecs-mobile-card-table tbody tr{
+    grid-template-columns:minmax(0,3fr) minmax(0,2fr)!important;
+  }
+  .workspace table.load-results-table.ecs-mobile-card-table tbody td:first-child{
+    grid-column:auto!important;
+    color:var(--ecs-green-900)!important;
+    font-weight:750!important;
+  }
+  .workspace table.load-results-table.ecs-mobile-card-table tbody td:last-child{
+    text-align:right!important;
+    font-variant-numeric:tabular-nums;
+  }
+}
+
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="titlebar">
+    <div class="logo">ECS</div><div class="appname">ECS<small>Environmental Calculation System</small></div><button type="button" class="ecs-mobile-menu-toggle" id="ecsMobileMenuToggle" aria-expanded="false" aria-controls="ecsMainMenu" aria-label="Mở menu">☰<span>Menu</span></button>
+    </div>
+
+  <nav class="menubar" id="ecsMainMenu" aria-label="Nhóm menu chức năng">
+    <div class="menuwrap">
+      <button class="menuitem active" data-menu="file" aria-expanded="false">Tệp ▾</button>
+      <div class="dropdown">
+        <button data-action="home">Trang chủ</button>
+        <button data-action="newProject">Tạo dự án mới</button>
+        <button data-action="openProjectDetails">Thông tin dự án</button>
+        <button data-action="saveLocal">Lưu dự án</button>
+        <button data-action="openImport">Nhập file dự án…</button>
+        <button data-action="export">Xuất file dự án</button>
+        <div class="dropdown-separator"></div>
+        <button data-action="exitApp">Thoát</button>
+      </div>
+    </div>
+    <div class="menuwrap">
+      <button class="menuitem" data-menu="design" aria-expanded="false">Thiết kế ▾</button>
+      <div class="dropdown">
+        <button data-design-domain="water">Nước cấp</button>
+        <button data-design-domain="wastewater">Nước thải</button>
+        <button data-design-domain="air">Khí thải</button>
+        <button data-design-domain="solidwaste">Chất thải rắn</button>
+      </div>
+    </div>
+    <div class="menuwrap">
+      <button class="menuitem" data-menu="operation" aria-expanded="false">Vận hành ▾</button>
+      <div class="dropdown">
+        <button data-module-action="operation">Vận hành</button>
+        <button data-action="toggleInspector">Ẩn/hiện bảng thuộc tính</button>
+      </div>
+    </div>
+    <div class="menuwrap">
+      <button class="menuitem" data-menu="help" aria-expanded="false">Trợ giúp ▾</button>
+      <div class="dropdown">
+        <div class="dropdown-note">ECS — Hệ thống tính toán chuyên ngành kỹ thuật môi trường: nước cấp, nước thải, khí thải và chất thải rắn.</div>
+      </div>
+    </div>
+  </nav>
+  <input type="file" id="jsonFile" accept=".json,application/json" hidden>
+</header>
+
+
+  <section class="home-page" id="homePage">
+    <div class="home-hero">
+      <div class="home-brand-mark">ECS</div>
+      <div>
+        <div class="home-eyebrow">NỀN TẢNG TÍNH TOÁN KỸ THUẬT MÔI TRƯỜNG</div>
+        <h1>ECS — Environmental Calculation System</h1>
+        <p>ECS là hệ thống hỗ trợ kỹ sư môi trường thực hiện các phép tính chuyên ngành, tổ chức dữ liệu dự án và từng bước triển khai thiết kế. Phạm vi phát triển gồm bốn lĩnh vực: nước cấp, nước thải, khí thải và chất thải rắn.</p>
+        <div class="home-actions">
+          <button class="btn primary" type="button" id="homeNewProject">＋ Tạo dự án mới</button>
+          <button class="btn" type="button" id="homeImportProject">Nhập dự án JSON</button>
+        </div>
+      </div>
+    </div>
+    <section class="panel home-projects-panel" aria-label="Danh sách dự án">
+      <div class="panelhead">
+        <div><h2>Dự án đã lưu trên trình duyệt</h2><div class="sub">Chọn một dự án để tiếp tục làm việc trên thiết bị này</div></div>
+        <span class="sub" id="savedProjectCount">0 dự án</span>
+      </div>
+      <div class="panelbody">
+        <div id="savedProjectsList" class="saved-projects-list"></div>
+        <div id="noSavedProjects" class="empty-projects">
+          <div class="empty-projects-icon">▤</div>
+          <strong>Chưa có dự án nào được lưu</strong>
+          <p>Tạo dự án mới hoặc nhập file JSON để bắt đầu. Dự án chỉ xuất hiện tại đây sau khi được lưu trên trình duyệt.</p>
+        </div>
+      </div>
+    </section>
+    <div class="home-footnote">Lưu ý: dữ liệu lưu trên trình duyệt chỉ có sẵn trong cùng trình duyệt và hồ sơ người dùng. Hãy xuất JSON để sao lưu hoặc chuyển dự án sang thiết bị khác.</div>
+  </section>
+
+  <section class="project-page hidden" id="projectPage">
+    <div class="project-page-main">
+      <section class="panel">
+        <div class="panelhead">
+          <div><h2>Thông tin dự án</h2><div class="sub">Nhập trực tiếp thông tin tổng quan của công trình</div></div>
+          <span class="sub" id="projectPageStatus">Chưa lưu thay đổi</span>
+        </div>
+        <div class="panelbody">
+          <div class="properties project-fields">
+            <div class="field"><label for="projectName">Tên dự án / công trình</label><input id="projectName" value="Dự án mới"></div>
+            <div class="field"><label for="projectOwner">Chủ đầu tư / đơn vị</label><input id="projectOwner" placeholder="Nhập tên chủ đầu tư"></div>
+            <div class="field"><label for="projectContact">Người liên hệ</label><input id="projectContact" placeholder="Họ tên, điện thoại hoặc email"></div>
+            <div class="field"><label for="projectLocation">Địa điểm xây dựng</label><input id="projectLocation" placeholder="Địa chỉ / tỉnh thành"></div>
+            <div class="field"><label for="designCompany">Đơn vị thiết kế</label><input id="designCompany" placeholder="Nhập tên đơn vị thiết kế"></div>
+            <div class="field"><label for="designCompanyAddress">Địa chỉ đơn vị thiết kế</label><input id="designCompanyAddress" placeholder="Địa chỉ / tỉnh thành"></div>
+            
+            
+            
+            <div class="field design-fields-field">
+              <label>Lĩnh vực thiết kế</label>
+              <div class="design-fields-options">
+                <label class="design-field-option"><input type="checkbox" name="designFields" value="water"><span>Nước cấp</span></label>
+                <label class="design-field-option"><input type="checkbox" name="designFields" value="wastewater"><span>Nước thải</span></label>
+                <label class="design-field-option"><input type="checkbox" name="designFields" value="air"><span>Khí thải</span></label>
+                <label class="design-field-option"><input type="checkbox" name="designFields" value="solidwaste"><span>Chất thải rắn</span></label>
+              </div>
+            </div>
+            <div class="field"><label for="projectDescription">Mô tả / ghi chú dự án</label><textarea id="projectDescription" placeholder="Phạm vi thiết kế, yêu cầu đầu ra, ghi chú khác…"></textarea></div>
+          <input type="hidden" id="projectCapacity" value="">
+          </div>
+          <div id="legacyProjectDesignFields" hidden aria-hidden="true" style="display:none!important">
+  <select id="projectTypeModal"><option>Sinh hoạt</option><option>Sản xuất thực phẩm</option><option>Bệnh viện</option><option>Nước cấp / RO</option><option>Khác</option></select>
+  <select id="designBasisModal"><option>Q trung bình ngày</option><option>Q giờ đỉnh</option><option>Q thiết kế nhập riêng</option></select>
+</div>
+<div class="project-page-actions">
+            <button class="btn" type="button" id="cancelProjectEdit">Bắt đầu thiết kế</button>
+            <button class="btn primary" type="button" id="applyProjectEdit">Lưu dự án</button>
+          </div>
+        </div>
+      </section>
+    </div>
+  </section>
+
+  <section class="domain-page hidden" id="domainPage">
+    <div class="domain-intro">
+      <h1>Chọn lĩnh vực thiết kế</h1>
+      <p>Chọn nhóm công cụ phù hợp với bài toán kỹ thuật môi trường của dự án.</p>
+    </div>
+    <div class="domain-grid">
+      <button class="domain-card" type="button" data-domain="water">
+        <span class="domain-icon" aria-hidden="true">💧</span><span><h2>Nước cấp</h2><p>Tính toán nhu cầu nước, công trình xử lý, bể chứa, đường ống và thiết bị cấp nước.</p><span class="choose">Mở nhóm công cụ →</span></span>
+      </button>
+      <button class="domain-card" type="button" data-domain="wastewater">
+        <span class="domain-icon" aria-hidden="true">♻</span><span><h2>Nước thải</h2><p>Tính tải lượng, thông số công nghệ và công trình trong hệ thống xử lý nước thải.</p><span class="choose">Mở nhóm công cụ →</span></span>
+      </button>
+      <button class="domain-card" type="button" data-domain="air">
+        <span class="domain-icon" aria-hidden="true">〰</span><span><h2>Khí thải</h2><p>Tính lưu lượng, tải lượng ô nhiễm, hệ thống thu gom và thiết bị xử lý khí thải.</p><span class="choose">Mở nhóm công cụ →</span></span>
+      </button>
+      <button class="domain-card" type="button" data-domain="solidwaste">
+        <span class="domain-icon" aria-hidden="true">▤</span><span><h2>Chất thải rắn</h2><p>Tính khối lượng, thành phần, nhu cầu lưu chứa và phương án quản lý, xử lý.</p><span class="choose">Mở nhóm công cụ →</span></span>
+      </button>
+    </div>
+  </section>
+  <section class="wastewater-tools-page hidden" id="wastewaterToolsPage">
+    <div class="domain-intro">
+      <h1>Công cụ thiết kế nước thải</h1>
+      <p>Chọn nhóm chức năng để tiếp tục làm việc trong dự án hiện tại.</p>
+    </div>
+    <div class="tool-grid">
+      <button class="tool-card" type="button" data-wastewater-tool="load"><span class="domain-icon">▥</span><span><h2>Tải lượng</h2><p>Nhập thông số đầu vào và tính lưu lượng, tải lượng ô nhiễm.</p><span class="choose">Mở công cụ →</span></span></button>
+      <button class="tool-card" type="button" data-wastewater-tool="technology"><span class="domain-icon">⌘</span><span><h2>Chọn công nghệ</h2><p>Không gian lựa chọn và so sánh công nghệ xử lý nước thải.</p><span class="choose">Mở công cụ →</span></span></button>
+      <button class="tool-card" type="button" data-wastewater-tool="units"><span class="domain-icon">📐</span><span><h2>Tính toán chi tiết từng công trình</h2><p>Tính kích thước, thông số thiết kế và thiết bị cho từng công trình đơn vị.</p><span class="choose">Mở công cụ →</span></span></button>
+      <button class="tool-card" type="button" data-wastewater-tool="reports"><span class="domain-icon">▤</span><span><h2>Báo cáo</h2><p>Tổng hợp dữ liệu dự án và kết quả tính toán thành báo cáo.</p><span class="choose">Mở công cụ →</span></span></button>
+      <button class="tool-card" type="button" data-wastewater-tool="tools"><span class="domain-icon">⚙</span><span><h2>Công cụ</h2><p>Các tiện ích tính toán hỗ trợ kỹ thuật môi trường.</p><span class="choose">Mở công cụ →</span></span></button>
+    </div>
+    <div class="domain-empty-actions"><button class="btn back-button" type="button" id="backToDomainSelection">← Quay lại 4 lĩnh vực</button></div>
+  </section>
+  <section class="wastewater-tools-page hidden" id="loadChoicesPage">
+    <div class="domain-intro"><h1>Tải lượng</h1><p>Nhập thông số đầu vào và xem kết quả tính toán.</p></div>
+    <div class="domain-empty-actions"><button class="btn back-button" type="button" id="backToWastewaterTools">← Quay lại công cụ nước thải</button></div>
+  </section>
+
+  <section class="wastewater-tools-page hidden" id="technologySelectionPage">
+    <div class="technology-topbar">
+      <button class="btn back-button" type="button" id="backFromTechnology">← Quay lại</button>
+    </div>
+    <div class="domain-intro"><h1>Chọn công nghệ</h1><p>Chọn các công trình đơn vị cần sử dụng. Thay đổi được tự động lưu vào dự án.</p></div>
+    <div class="technology-groups" id="technologyCatalog"></div>
+    <div class="technology-footer">
+      <div class="technology-count" id="technologyCount">Đã chọn 0 công trình</div>
+      <button class="btn back-button technology-bottom-back" type="button" id="backFromTechnologyBottom">← Quay lại</button>
+    </div>
+  </section>
+  <section class="wastewater-tools-page hidden" id="unitCardsPage">
+    <div class="domain-intro"><h1>Tính toán chi tiết công trình</h1><p>Chọn một công trình để mở khu vực tính toán chi tiết.</p></div>
+    <div class="unit-cards-grid" id="selectedUnitCards"></div>
+    <div class="domain-empty-actions"><button class="btn back-button" type="button" id="backToTechnology">← Quay lại chọn công nghệ</button></div>
+  </section>
+  <section class="wastewater-tools-page hidden" id="unitDetailPage">
+    <div class="technology-topbar"><button class="btn back-button" type="button" id="backToUnitCards">← Quay lại danh sách công trình</button></div>
+    <div class="domain-intro"><h1 id="unitDetailTitle">Công trình</h1><p id="unitDetailSubtitle">Tính toán chi tiết công trình đơn vị.</p></div>
+    <nav class="ecs-unit-tabs" id="unitDetailTabs" aria-label="Các nội dung tính toán">
+      <button type="button" data-unit-tab="input">Đầu vào</button>
+      <button type="button" data-unit-tab="calc">Tính toán</button>
+      <button type="button" data-unit-tab="dimensions">Kích thước</button>
+      <button type="button" data-unit-tab="equipment">Thiết bị</button>
+    </nav>
+    <div id="unitDetailContent"></div>
+  </section>
+
+  <section class="domain-empty hidden" id="domainComingSoon">
+    <div class="domain-icon" id="domainComingIcon" style="margin:0 auto 14px">🛠</div>
+    <h2 id="domainComingTitle">Nhóm công cụ</h2>
+    <p id="domainComingText">Nhóm công cụ này sẽ được phát triển theo từng giai đoạn. Chức năng tính toán sẽ chỉ được bật sau khi được triển khai và kiểm thử.</p>
+    <div class="domain-empty-actions"><button class="btn back-button" type="button" id="backToDomains">← Chọn lĩnh vực khác</button><button class="btn back-button" type="button" id="backToProject">Thông tin dự án</button></div>
+  </section>
+
+  <div class="workspace">
+  <div class="load-workspace-topbar">
+    <button class="btn back-button" type="button" id="backFromLoadWorkspace">← Quay lại</button>
+  </div>
+  <div class="load-workspace-heading">
+    <div class="domain-intro"><h1>Tải lượng</h1><p>Nhập thông số đầu vào và xem kết quả tính toán.</p></div>
+    <nav class="ecs-unit-tabs load-unit-tabs" aria-label="Nội dung tải lượng">
+      <button type="button" data-load-tab="input">Đầu vào</button>
+      <button type="button" data-load-tab="results">Kết quả tính toán</button>
+    </nav>
+  </div>
+  <main class="center">
+    <details class="panel input-review-panel" id="inputReview">
+      <summary class="panelhead input-review-head">
+        <div class="input-review-heading">
+          <h2>Thông số đầu vào</h2>
+          <div class="sub">Dữ liệu do người dùng cung cấp</div>
+        </div>
+        <span class="input-review-chevron" aria-hidden="true"></span>
+      </summary>
+      <div class="panelbody input-review-body">
+        <div class="tablewrap">
+          <table class="data-table">
+            <thead><tr><th>Thông số</th><th>Kết quả</th><th>Số liệu nhập</th></tr></thead>
+            <tbody id="inputRows"></tbody>
+          </table>
+        </div>
+      </div>
+    </details>
+    <section class="panel calculation-panel">
+      <div class="panelhead"><div><h2>Kết quả tính toán</h2><div class="sub">Kết quả của dữ liệu đầu vào hiện tại</div></div><span class="sub" id="resultStatus">Đã cập nhật</span></div>
+      <div class="panelbody">
+        <section class="calculation-results">
+          <div class="tablewrap">
+            <table class="data-table load-results-table">
+              <thead><tr><th>Thông số</th><th>Kết quả</th></tr></thead>
+              <tbody id="rows"></tbody>
+            </table>
+          </div>
+        </section>
+        <div class="tablefoot">Công thức bản dựng: tải lượng = Q × C ÷ 1.000. Lưu lượng giờ đỉnh = Q × K ÷ thời gian hoạt động. Cần đối chiếu công thức và trường dữ liệu với đặc tả V7.0.292 trước khi nghiệm thu.</div>
+      </div>
+    </section>
+  </main>
+  <aside class="right" id="inspector">
+    <section class="panel">
+      
+      <div class="panelbody">
+      <section class="inspector-block load-properties">
+        <h3 id="inputHeading">Thông số đầu vào</h3>
+        <div class="properties">
+          <div class="formgrid">
+            <div class="field"><label for="ph">pH đầu vào (0–14)</label><input id="ph" type="number" min="0" max="14" step="0.1" value="7" data-key="ph"></div>
+            <div class="field"><label for="projectType">Loại nước thải</label><select id="projectType"><option>Sinh hoạt</option><option>Sản xuất thực phẩm</option><option>Bệnh viện</option><option>Nước cấp / RO</option><option>Khác</option></select></div>
+            <div class="field" id="otherWastewaterTypeField" hidden>
+              <label for="otherWastewaterType">Tên loại nước thải cụ thể</label>
+              <input id="otherWastewaterType" type="text" placeholder="Nhập tên loại nước thải">
+            </div>
+            <select id="designBasis" hidden aria-hidden="true" style="display:none!important"><option>Q trung bình ngày</option><option>Q giờ đỉnh</option><option>Q thiết kế nhập riêng</option></select>
+            <div class="field"><label for="qavg">Lưu lượng trung bình ngày Q<sub>tb</sub> (m³/ngày)</label><input id="qavg" type="number" min="0" step="any" value="100" data-key="qavg"></div>
+            <div class="field"><label for="kpeak">Hệ số không điều hòa K (—)</label><input id="kpeak" type="number" min="0" step="any" value="2.5" data-key="kpeak"></div>
+            <div class="field"><label for="hours">Thời gian hoạt động (giờ/ngày)</label><input id="hours" type="number" min="0.1" max="24" step="any" value="24" data-key="hours"></div>
+            <input type="hidden" id="qmanual" type="number" min="0" step="any" placeholder="Không bắt buộc" data-key="qmanual">
+            <div class="field"><label for="bod">BOD₅ (mg/L)</label><input id="bod" type="number" min="0" step="any" value="250" data-key="bod"></div>
+            <div class="field"><label for="cod">COD (mg/L)</label><input id="cod" type="number" min="0" step="any" value="500" data-key="cod"></div>
+            <div class="field"><label for="tss">TSS (mg/L)</label><input id="tss" type="number" min="0" step="any" value="250" data-key="tss"></div>
+            <div class="field"><label for="tn">Tổng Nitơ (TN) (mg/L)</label><input id="tn" type="number" min="0" step="any" value="40" data-key="tn"></div>
+            <div class="field"><label for="nh4">Amoni (tính theo N) (mg/L)</label><input id="nh4" type="number" min="0" step="any" value="30" data-key="nh4"></div>
+            <div class="field"><label for="tp">Tổng Phốt pho (TP) (mg/L)</label><input id="tp" type="number" min="0" step="any" value="8" data-key="tp"></div>
+            <div class="field"><label for="alkalinity">Độ kiềm tổng (mg/L theo CaCO₃)</label><input id="alkalinity" type="number" min="0" step="any" value="150" data-key="alkalinity"></div>
+            <div class="field"><label for="oilgrease">Dầu mỡ (mg/L) – tham khảo</label><input id="oilgrease" type="number" min="0" step="any" value="50" placeholder="Giá trị tham khảo" data-key="oilgrease"></div>
+            <div class="field"><label for="temperature">Nhiệt độ (°C) – tham khảo</label><input id="temperature" type="number" min="0" max="100" step="any" value="28" placeholder="Giá trị tham khảo" data-key="temperature"></div>
+          </div>
+        </div>
+      </section>
+    </section>
+      </div>
+    </section>
+  </aside>
+</div>
+
+<footer class="statusbar"><span>ECS — Environmental Calculation System</span><span id="statusProject">Dự án: Dự án mới</span><span>Đơn vị: SI</span><span class="ok" id="statusSave">● Sẵn sàng</span></footer>
+<script>
+(()=>{'use strict';
+const schema={qavg:{default:100,min:0},kpeak:{default:2.5,min:0},hours:{default:24,min:.1,max:24},qmanual:{default:null,min:0},bod:{default:250,min:0},cod:{default:500,min:0},tss:{default:250,min:0},tn:{default:40,min:0},nh4:{default:30,min:0},tp:{default:8,min:0},alkalinity:{default:150,min:0},oilgrease:{default:50,min:0},temperature:{default:28,min:0,max:100},ph:{default:7,min:0,max:14}};
+const pollutants=[{key:'bod',label:'BOD₅'},{key:'cod',label:'COD'},{key:'tss',label:'TSS'},{key:'tn',label:'Tổng Nitơ (TN)'},{key:'nh4',label:'Amoni-N'},{key:'tp',label:'Tổng Phốt pho (TP)'},{key:'oilgrease',label:'Dầu mỡ'}];
+const $=id=>document.getElementById(id);let currentModule='load';
+const fmt=n=>Number.isFinite(n)?n.toLocaleString('vi-VN',{maximumFractionDigits:2}):'—';
+const PROJECTS_KEY='wwtc-next-projects-v1';
+const LEGACY_KEY='wwtc-next-project';
+let currentProjectId=null;
+let projectDirty=false;
+let designAccessGranted=false;
+function hasActiveSavedProject(){
+  if(!designAccessGranted || !currentProjectId) return false;
+  return readRegistry().some(p=>String(p.id)===String(currentProjectId));
+}
+function syncDesignAccess(){
+  const allowed=hasActiveSavedProject();
+  const designButton=document.querySelector('[data-menu="design"]');
+  if(designButton){
+    designButton.classList.toggle('design-locked',!allowed);
+    designButton.setAttribute('aria-disabled',String(!allowed));
+    designButton.title=allowed?'':'Hãy mở một dự án đã lưu hoặc tạo và lưu dự án mới trước khi sử dụng Thiết kế.';
+  }
+  document.querySelectorAll('[data-design-domain]').forEach(button=>{
+    button.classList.toggle('design-domain-locked',!allowed);
+    button.setAttribute('aria-disabled',String(!allowed));
+    button.title=allowed?'':'Cần mở hoặc lưu dự án trước khi thiết kế.';
+  });
+  const projectInfoButton=document.querySelector('[data-action="openProjectDetails"]');
+  if(projectInfoButton){
+    projectInfoButton.disabled=!allowed;
+    projectInfoButton.classList.toggle('project-info-locked',!allowed);
+    projectInfoButton.setAttribute('aria-disabled',String(!allowed));
+    projectInfoButton.title=allowed?'':'Mở dự án đã lưu hoặc tạo và lưu dự án mới để xem thông tin dự án.';
+  }
+  // Lưu dự án chỉ khả dụng sau khi mở dự án cũ hoặc bắt đầu tạo dự án mới.
+  const hasProjectSession=allowed||isCreatingProject;
+  const saveButton=document.querySelector('[data-action="saveLocal"]');
+  if(saveButton){
+    saveButton.disabled=!hasProjectSession;
+    saveButton.classList.toggle('project-info-locked',!hasProjectSession);
+    saveButton.setAttribute('aria-disabled',String(!hasProjectSession));
+    saveButton.title=hasProjectSession?'':'Mở dự án đã lưu hoặc chọn Tạo dự án mới trước khi lưu.';
+  }
+}
+
+const makeId=()=>`p_${Date.now().toString(36)}_${Math.random().toString(36).slice(2,8)}`;
+const ECS_STORAGE_BACKUP_KEY='ecs-v69-migration-backup-v1';
+let ecsDbPromise=null;
+let ecsStorageSyncPromise=Promise.resolve({ok:true});
+let ecsStorageSyncError=null;
+let ecsStorageWriteQueue=Promise.resolve();
+let ecsStorageReady=false;
+function isProjectRecord(p){
+  return !!p && typeof p==='object' && !Array.isArray(p) && typeof p.id==='string' && p.id.trim().length>0;
+}
+function parseRegistryPayload(raw){
+  if(!raw)return null;
+  const parsed=JSON.parse(raw);
+  if(Array.isArray(parsed))return parsed.filter(isProjectRecord);
+  if(parsed&&Array.isArray(parsed.projects))return parsed.projects.filter(isProjectRecord);
+  throw new Error('Cấu trúc danh sách dự án không hợp lệ');
+}
+function readRegistry(){
+  try{
+    const raw=localStorage.getItem(PROJECTS_KEY);
+    if(raw!==null){
+      const projects=parseRegistryPayload(raw);
+      if(projects)return projects;
+    }
+  }catch(e){
+    console.warn('Không đọc được danh sách dự án chính; giữ nguyên dữ liệu để phục hồi:',e);
+  }
+  try{
+    const legacy=localStorage.getItem(LEGACY_KEY);
+    if(legacy){
+      const old=JSON.parse(legacy);
+      if(old&&typeof old==='object'&&(old.inputs||old.data?.inputs)){
+        const migrated={...old,id:typeof old.id==='string'&&old.id?old.id:makeId(),updatedAt:old.updatedAt||old.savedAt||new Date().toISOString()};
+        return [migrated];
+      }
+    }
+  }catch(e){console.warn('Không đọc được dữ liệu dự án phiên bản cũ:',e)}
+  return [];
+}
+function openEcsDatabase(){
+  if(!('indexedDB' in window))return Promise.reject(new Error('IndexedDB không khả dụng'));
+  if(ecsDbPromise)return ecsDbPromise;
+  ecsDbPromise=new Promise((resolve,reject)=>{
+    const req=indexedDB.open('ECS_CALCULATION_DB',2);
+    req.onupgradeneeded=()=>{
+      const db=req.result;
+      if(!db.objectStoreNames.contains('projects'))db.createObjectStore('projects',{keyPath:'id'});
+      if(!db.objectStoreNames.contains('meta'))db.createObjectStore('meta',{keyPath:'key'});
+    };
+    req.onsuccess=()=>{const db=req.result;db.onversionchange=()=>{db.close();ecsDbPromise=null};resolve(db)};
+    req.onerror=()=>{ecsDbPromise=null;reject(req.error||new Error('Không mở được IndexedDB'))};
+    req.onblocked=()=>console.warn('IndexedDB đang bị chặn bởi tab ECS khác; hãy đóng tab cũ rồi thử lại.');
+  });
+  return ecsDbPromise;
+}
+function readIndexedDBSnapshot(db){
+  return new Promise((resolve,reject)=>{
+    const tx=db.transaction(['projects','meta'],'readonly');
+    const getAll=tx.objectStore('projects').getAll();
+    const metaReq=tx.objectStore('meta').get('registry');
+    let projects=[],meta=null;
+    getAll.onsuccess=()=>{projects=getAll.result||[]};
+    metaReq.onsuccess=()=>{meta=metaReq.result||null};
+    tx.oncomplete=()=>resolve({projects,meta});
+    tx.onerror=()=>reject(tx.error||new Error('Không đọc được dữ liệu IndexedDB'));
+    tx.onabort=()=>reject(tx.error||new Error('Đọc IndexedDB bị hủy'));
+  });
+}
+function registrySignature(projects){
+  const raw=JSON.stringify(projects);
+  let hash=2166136261;
+  for(let i=0;i<raw.length;i++){hash^=raw.charCodeAt(i);hash=Math.imul(hash,16777619)}
+  return (hash>>>0).toString(16).padStart(8,'0');
+}
+function mirrorRegistryToIndexedDB(projects,reason='sync'){
+  const snapshot=deepCopy(projects);
+  return openEcsDatabase().then(db=>new Promise((resolve,reject)=>{
+    let tx;
+    try{tx=db.transaction(['projects','meta'],'readwrite')}catch(e){reject(e);return}
+    const store=tx.objectStore('projects');
+    store.clear();
+    snapshot.forEach(p=>store.put(p));
+    tx.objectStore('meta').put({
+      key:'registry',version:2,count:snapshot.length,
+      ids:snapshot.map(p=>p.id),syncedAt:new Date().toISOString(),
+      source:'localStorage',reason,signature:registrySignature(snapshot)
+    });
+    tx.oncomplete=()=>resolve({ok:true,count:snapshot.length,signature:registrySignature(snapshot)});
+    tx.onerror=()=>reject(tx.error||new Error('Không thể đồng bộ danh sách dự án sang IndexedDB'));
+    tx.onabort=()=>reject(tx.error||new Error('Giao dịch đồng bộ IndexedDB bị hủy'));
+  }));
+}
+function queueIndexedDBMirror(projects,reason='write'){
+  const snapshot=deepCopy(projects);
+  const operation=ecsStorageWriteQueue.catch(()=>{}).then(async()=>{
+    const written=await mirrorRegistryToIndexedDB(snapshot,reason);
+    const db=await openEcsDatabase();
+    const verified=await readIndexedDBSnapshot(db);
+    if(verified.projects.length!==snapshot.length||verified.meta?.signature!==registrySignature(snapshot)){
+      throw new Error('Đối chiếu dữ liệu IndexedDB sau khi ghi không khớp.');
+    }
+    ecsStorageSyncError=null;
+    return written;
+  });
+  ecsStorageWriteQueue=operation;
+  ecsStorageSyncPromise=operation.catch(error=>{
+    ecsStorageSyncError=error;
+    console.error('Đồng bộ IndexedDB thất bại; dữ liệu localStorage vẫn được giữ nguyên:',error);
+    return {ok:false,error};
+  });
+  return ecsStorageSyncPromise;
+}
+function writeRegistry(projects){
+  if(!Array.isArray(projects)||projects.some(p=>!isProjectRecord(p)))throw new Error('Danh sách dự án không hợp lệ; không ghi dữ liệu.');
+  const payload={version:2,projects:deepCopy(projects),updatedAt:new Date().toISOString()};
+  const serialized=JSON.stringify(payload);
+  // localStorage là bản ghi chính đồng bộ để không làm mất dữ liệu khi IndexedDB không khả dụng.
+  localStorage.setItem(PROJECTS_KEY,serialized);
+  const check=localStorage.getItem(PROJECTS_KEY);
+  if(check!==serialized)throw new Error('Không xác minh được dữ liệu sau khi ghi localStorage.');
+  queueIndexedDBMirror(projects,'write');
+  return true;
+}
+async function migrateRegistryToIndexedDB(){
+  try{
+    const raw=localStorage.getItem(PROJECTS_KEY);
+    const db=await openEcsDatabase();
+    const current=await readIndexedDBSnapshot(db);
+    let projects;
+    const indexedSnapshotValid=!!current.meta&&Array.isArray(current.projects)&&
+      current.meta.count===current.projects.length&&
+      current.meta.signature===registrySignature(current.projects)&&
+      current.projects.every(isProjectRecord);
+    let localRegistryValid=false;
+    if(raw!==null){try{parseRegistryPayload(raw);localRegistryValid=true}catch(e){localRegistryValid=false}}
+    if((raw===null||!localRegistryValid)&&indexedSnapshotValid){
+      // Khôi phục từ IndexedDB đã xác minh khi khóa localStorage bị thiếu hoặc hỏng.
+      if(raw!==null&&!localStorage.getItem(ECS_STORAGE_BACKUP_KEY))localStorage.setItem(ECS_STORAGE_BACKUP_KEY,raw);
+      projects=current.projects.map(p=>deepCopy(p));
+      const restored=JSON.stringify({version:2,projects,updatedAt:new Date().toISOString()});
+      localStorage.setItem(PROJECTS_KEY,restored);
+      if(localStorage.getItem(PROJECTS_KEY)!==restored)throw new Error('Không thể khôi phục registry từ IndexedDB sang localStorage.');
+    }else{
+      // Không ghi đè dữ liệu IndexedDB khi cả registry local lẫn metadata đều không thể xác minh.
+      if((raw===null||!localRegistryValid)&&(current.projects||[]).length>0){
+        throw new Error('Không xác minh được registry local và metadata IndexedDB; dừng migration để tránh ghi đè dữ liệu cần phục hồi.');
+      }
+      projects=readRegistry();
+      // Giữ bản sao nguyên trạng của cả registry hiện tại và khóa legacy trước khi migration.
+      if(raw!==null&&!localStorage.getItem(ECS_STORAGE_BACKUP_KEY))localStorage.setItem(ECS_STORAGE_BACKUP_KEY,raw);
+      const legacyRaw=localStorage.getItem(LEGACY_KEY);
+      if(legacyRaw!==null&&!localStorage.getItem('ecs-v69-legacy-backup-v1'))localStorage.setItem('ecs-v69-legacy-backup-v1',legacyRaw);
+    }
+    const signature=registrySignature(projects);
+    const ids=projects.map(p=>p.id).sort();
+    const dbIds=(current.projects||[]).filter(isProjectRecord).map(p=>p.id).sort();
+    const needsSync=!current.meta||current.meta.version!==2||current.meta.count!==projects.length||
+      current.meta.signature!==signature||JSON.stringify(dbIds)!==JSON.stringify(ids);
+    if(needsSync)await mirrorRegistryToIndexedDB(projects,'migration');
+    const verified=await readIndexedDBSnapshot(db);
+    const verifiedIds=(verified.projects||[]).filter(isProjectRecord).map(p=>p.id).sort();
+    if(verified.projects.length!==projects.length||JSON.stringify(verifiedIds)!==JSON.stringify(ids)||verified.meta?.signature!==signature){
+      throw new Error('Đối chiếu sau migration không khớp số lượng, ID hoặc nội dung dự án.');
+    }
+    ecsStorageSyncError=null;ecsStorageReady=true;
+    return {ok:true,count:projects.length,backup:!!localStorage.getItem(ECS_STORAGE_BACKUP_KEY),version:2};
+  }catch(error){
+    ecsStorageSyncError=error;ecsStorageReady=false;
+    console.warn('Migration/đồng bộ IndexedDB chưa hoàn tất; localStorage vẫn là nguồn dữ liệu dự phòng:',error);
+    return {ok:false,error};
+  }
+}
+function projectTitle(p){return p?.project?.name?.trim()||'Dự án chưa đặt tên';}
+function currentSnapshot(){
+  const d=snapshot();
+  d.id=currentProjectId||makeId();
+  d.updatedAt=new Date().toISOString();
+  return d;
+}
+function showToast(message,type='success',duration=3500){
+  let host=document.getElementById('wwtcToastHost');
+  if(!host){
+    host=document.createElement('div');
+    host.id='wwtcToastHost';
+    host.style.cssText='position:fixed;top:18px;right:18px;z-index:200000;display:flex;flex-direction:column;gap:10px;width:min(420px,calc(100vw - 36px));pointer-events:none;';
+    document.body.appendChild(host);
+  }
+  const toast=document.createElement('div');
+  toast.setAttribute('role',type==='error'?'alert':'status');
+  toast.style.cssText='pointer-events:auto;display:flex;align-items:flex-start;gap:12px;padding:14px 16px;border-radius:10px;color:#fff;box-shadow:0 8px 28px rgba(0,0,0,.22);font:600 14px/1.5 system-ui,sans-serif;overflow-wrap:anywhere;transform:translateY(-6px);opacity:0;transition:opacity .18s ease,transform .18s ease;background:'+(type==='error'?'#b42318':'#176b45')+';';
+  const icon=document.createElement('span');
+  icon.textContent=type==='error'?'!':'✓';
+  icon.style.cssText='display:inline-flex;align-items:center;justify-content:center;flex:0 0 22px;width:22px;height:22px;border:1.5px solid rgba(255,255,255,.8);border-radius:50%;font-weight:800;';
+  const text=document.createElement('div');
+  text.textContent=message;
+  text.style.flex='1';
+  const dismiss=document.createElement('button');
+  dismiss.type='button';dismiss.textContent='×';dismiss.setAttribute('aria-label','Đóng thông báo');
+  dismiss.style.cssText='flex:0 0 auto;border:0;background:transparent;color:#fff;font-size:22px;line-height:1;cursor:pointer;padding:0 0 0 4px;';
+  const remove=()=>{if(!toast.isConnected)return;toast.style.opacity='0';toast.style.transform='translateY(-6px)';setTimeout(()=>toast.remove(),200);};
+  dismiss.addEventListener('click',remove);
+  toast.append(icon,text,dismiss);
+  host.appendChild(toast);
+  requestAnimationFrame(()=>{toast.style.opacity='1';toast.style.transform='translateY(0)';});
+  if(duration>0)setTimeout(remove,duration);
+}
+function saveCurrentToRegistry(showNotice=true){
+  try{
+    const projects=readRegistry(),d=currentSnapshot();
+    const normalizedName=projectTitle(d).trim().toLocaleLowerCase('vi');
+    const duplicate=projects.find(p=>p.id!==d.id&&projectTitle(p).trim().toLocaleLowerCase('vi')===normalizedName);
+    if(duplicate){
+      const message=`Tên dự án “${projectTitle(d).trim()}” đã tồn tại trong danh sách dự án đã lưu. Vui lòng nhập tên khác.`;
+      showToast(message,'error',6000);
+      $('projectName').focus();
+      return false;
+    }
+    const idx=projects.findIndex(p=>p.id===d.id);
+    if(idx>=0)projects[idx]=d;else projects.unshift(d);
+    writeRegistry(projects);
+    currentProjectId=d.id;projectDirty=false;designAccessGranted=true;syncDesignAccess();
+    $('statusSave').textContent='● Đã lưu dự án';
+    if(showNotice)showToast('Đã lưu dự án thành công.','success',3500);
+    renderSavedProjects();
+    return true;
+  }catch(e){
+    if(showNotice)showToast('Không thể lưu dự án. Hãy kiểm tra dung lượng lưu trữ hoặc xuất JSON để sao lưu.','error',6000);
+    return false;
+  }
+}
+function hideMainPages(){
+  ['homePage','projectPage','domainPage','wastewaterToolsPage','loadChoicesPage','technologySelectionPage','unitCardsPage','unitDetailPage','domainComingSoon']
+    .forEach(id=>{const el=$(id);if(el)el.classList.add('hidden')});
+  const workspace=document.querySelector('.workspace');
+  if(workspace)workspace.classList.add('hidden');
+}
+function showHome(){
+  requestSaveDecision(()=>{
+    closeProjectDetails(false);
+    hideMainPages();
+    $('homePage').classList.remove('hidden');
+    renderSavedProjects();
+    closeMenus();
+  });
+}
+function showDomainSelection(){
+  hideMainPages();
+  $('domainPage').classList.remove('hidden');
+  closeMenus();
+}
+function selectDomain(domain){
+  const labels={water:{title:'Nước cấp',icon:'💧'},air:{title:'Khí thải',icon:'〰'},solidwaste:{title:'Chất thải rắn',icon:'▤'}};
+  hideMainPages();
+  if(domain==='wastewater'){
+    $('wastewaterToolsPage').classList.remove('hidden');
+    closeMenus();
+    return;
+  }
+  const item=labels[domain];if(!item)return;
+  $('domainComingSoon').dataset.backTarget='domains';
+  $('domainComingSoon').classList.remove('hidden');
+  $('domainComingTitle').textContent=item.title;
+  $('domainComingIcon').textContent=item.icon;
+  $('domainComingText').textContent='Nhóm công cụ '+item.title.toLowerCase()+' đã được xác định trong kiến trúc ECS nhưng chức năng tính toán riêng chưa được triển khai. Nhóm này sẽ được phát triển và kiểm thử ở giai đoạn tiếp theo.';
+  closeMenus();
+}
+function showWorkspace(){
+  hideMainPages();
+  document.querySelector('.workspace').classList.remove('hidden');
+  document.querySelector('.center').classList.remove('hidden');
+  document.querySelector('.right').classList.remove('hidden');
+}
+function renderSavedProjects(){
+  const projects=readRegistry(),list=$('savedProjectsList'),empty=$('noSavedProjects');
+  list.replaceChildren();
+  $('savedProjectCount').textContent=`${projects.length} dự án`;
+  empty.classList.toggle('hidden',projects.length>0);
+  for(const p of projects){
+    const card=document.createElement('article');card.className='saved-project-card';
+    const icon=document.createElement('div');icon.className='saved-project-icon';icon.textContent='W';
+    const info=document.createElement('div');info.className='saved-project-info';
+    const name=document.createElement('div');name.className='saved-project-name';name.textContent=projectTitle(p);
+    const meta=document.createElement('div');meta.className='saved-project-meta';
+    const owner=p.project?.owner||'Chưa nhập chủ đầu tư';
+    const location=p.project?.location||'Chưa nhập địa điểm';
+    const cap=p.project?.capacity?`${p.project.capacity} m³/ngày`:'Chưa đặt công suất';
+    const when=p.updatedAt||p.savedAt;
+    meta.textContent=`${owner} · ${location} · ${cap}${when?' · Cập nhật '+new Date(when).toLocaleString('vi-VN'):''}`;
+    const actions=document.createElement('div');actions.className='saved-project-actions';
+    const open=document.createElement('button');open.className='btn primary';open.type='button';open.textContent='Mở dự án';open.addEventListener('click',()=>openSavedProject(p.id));
+    const exp=document.createElement('button');exp.className='btn';exp.type='button';exp.textContent='Xuất JSON';exp.addEventListener('click',()=>exportProject(p.id));
+    const del=document.createElement('button');del.className='btn';del.type='button';del.textContent='Xóa';del.setAttribute('aria-label',`Xóa dự án ${projectTitle(p)}`);
+    del.addEventListener('click',event=>{
+      event.preventDefault();
+      event.stopPropagation();
+      requestDeleteProject(p.id);
+    });
+    actions.append(open,exp,del);info.append(name,meta,actions);card.append(icon,info);list.append(card);
+  }
+}
+function exportProject(id){
+  const p=readRegistry().find(x=>x.id===id);
+  if(!p){alert('Không tìm thấy dự án cần xuất.');return;}
+  const safe=(projectTitle(p).replace(/[^\p{L}\p{N}_-]+/gu,'_').slice(0,60)||'ECE_Project');
+  download(`${safe}.json`,JSON.stringify(p,null,2));
+}
+
+function requestDeleteProject(id){
+  const p=readRegistry().find(x=>x.id===id);
+  if(!p){
+    alert('Không tìm thấy dự án cần xóa. Danh sách sẽ được cập nhật lại.');
+    renderSavedProjects();
+    return;
+  }
+  // Dùng hộp xác nhận HTML thay cho window.confirm để tránh trường hợp trình duyệt
+  // chặn hộp thoại native khiến người dùng tưởng nút Xóa không hoạt động.
+  document.getElementById('wwtcDeleteConfirm')?.remove();
+  const overlay=document.createElement('div');
+  overlay.id='wwtcDeleteConfirm';
+  overlay.style.cssText='position:fixed;inset:0;z-index:99999;background:rgba(15,25,20,.55);display:flex;align-items:center;justify-content:center;padding:18px;';
+  const dialog=document.createElement('section');
+  dialog.setAttribute('role','dialog');
+  dialog.setAttribute('aria-modal','true');
+  dialog.setAttribute('aria-labelledby','wwtcDeleteTitle');
+  dialog.style.cssText='width:min(440px,100%);background:#fff;border-radius:12px;padding:22px;box-shadow:0 18px 60px rgba(0,0,0,.25);font:14px/1.55 system-ui,sans-serif;color:#203128;';
+  const title=document.createElement('h2');
+  title.id='wwtcDeleteTitle';title.textContent='Xóa dự án?';
+  title.style.cssText='margin:0 0 10px;font-size:19px;';
+  const message=document.createElement('p');
+  message.textContent=`Bạn sắp xóa “${projectTitle(p)}” khỏi danh sách dự án đã lưu trên trình duyệt. Thao tác này không thể hoàn tác.`;
+  message.style.cssText='margin:0 0 20px;';
+  const buttons=document.createElement('div');
+  buttons.style.cssText='display:flex;justify-content:flex-end;gap:8px;flex-wrap:wrap;';
+  const cancel=document.createElement('button');
+  cancel.type='button';cancel.textContent='Hủy';
+  cancel.style.cssText='border:1px solid #cbd5ce;background:#fff;color:#24372b;border-radius:7px;padding:9px 15px;cursor:pointer;';
+  const confirmButton=document.createElement('button');
+  confirmButton.type='button';confirmButton.textContent='Xóa dự án';
+  confirmButton.style.cssText='border:1px solid #b42318;background:#b42318;color:#fff;border-radius:7px;padding:9px 15px;cursor:pointer;';
+  const close=()=>{overlay.remove();};
+  cancel.addEventListener('click',close);
+  overlay.addEventListener('click',e=>{if(e.target===overlay)close();});
+  dialog.addEventListener('click',e=>e.stopPropagation());
+  confirmButton.addEventListener('click',()=>{
+    close();
+    deleteProject(id);
+  });
+  buttons.append(cancel,confirmButton);
+  dialog.append(title,message,buttons);
+  overlay.append(dialog);
+  document.body.append(overlay);
+  confirmButton.focus();
+}
+
+function deleteProject(id){
+  const projects=readRegistry();
+  const p=projects.find(x=>x.id===id);
+  if(!p){alert('Không tìm thấy dự án cần xóa. Danh sách sẽ được cập nhật lại.');renderSavedProjects();return false;}
+  const remaining=projects.filter(x=>x.id!==id);
+  try{
+    writeRegistry(remaining);
+    const verify=readRegistry();
+    if(verify.some(x=>x.id===id)){
+      throw new Error('Dự án vẫn còn trong danh sách sau khi ghi.');
+    }
+  }catch(err){
+    alert('Không thể xóa dự án khỏi bộ nhớ trình duyệt. Chi tiết: '+(err?.message||'Lỗi lưu trữ')+'.');
+    console.error('Xóa dự án thất bại',err);
+    renderSavedProjects();
+    return false;
+  }
+  if(currentProjectId===id){
+    currentProjectId=null;
+    projectDirty=false;
+    designAccessGranted=false;
+    syncDesignAccess();
+    $('statusProject').textContent='Chưa chọn dự án';
+    $('statusSave').textContent='● Chưa chọn dự án';
+    showHome();
+  }else{
+    renderSavedProjects();
+  }
+  return true;
+}
+function openSavedProject(id){
+  const p=readRegistry().find(x=>x.id===id);
+  if(!p){alert('Không tìm thấy dự án đã lưu.');return;}
+  requestSaveDecision(()=>{
+    const latest=readRegistry().find(x=>String(x.id)===String(id));
+    if(!latest){alert('Dự án không còn tồn tại trong danh sách.');return;}
+    loadProjectData(latest);
+    currentProjectId=latest.id;
+    projectDirty=false;
+    isCreatingProject=false;
+    designAccessGranted=true;
+    syncDesignAccess();
+    openProjectDetails();
+  });
+}
+function loadProjectData(d){
+  technologyUnits=Array.isArray(d.technology?.units)?d.technology.units:[];
+  const p=d.project||{};
+  setProjectForm(p);
+  $('projectType').value=p.projectType||'Sinh hoạt';$('projectTypeModal').value=p.projectType||'Sinh hoạt';
+  $('designBasis').value=p.designBasis||'Q trung bình ngày';
+  const v=d.inputs||d.data?.inputs;
+  if(v)apply(v);
+  $('statusProject').textContent='Dự án: '+projectTitle(d);
+  $('statusSave').textContent='● Đã mở dự án';
+}
+function deleteCurrentProject(){
+  if(!currentProjectId){showHome();return;}
+  deleteProject(currentProjectId);showHome();
+}
+function values(){const o={};for(const k of Object.keys(schema)){const e=document.querySelector(`[data-key="${k}"]`);o[k]=e.value.trim()===''?null:Number(e.value)}return o}
+function validate(v){const errors=[];for(const [k,r] of Object.entries(schema)){const n=v[k];if(n===null&&['qmanual','oilgrease','temperature'].includes(k))continue;if(n===null||!Number.isFinite(n))errors.push(`${k}: giá trị không hợp lệ`);else if(r.min!==undefined&&n<r.min)errors.push(`${k}: nhỏ hơn giới hạn`);else if(r.max!==undefined&&n>r.max)errors.push(`${k}: vượt giới hạn`)}return errors}
+function calc(v){
+  const q=v.qmanual!==null&&v.qmanual>0?v.qmanual:v.qavg;
+  const qHour=q/v.hours;
+  const qPeakHour=q*(v.kpeak||0)/v.hours;
+  return{
+    q,qHour,qMinute:qHour/60,
+    qh:qPeakHour,
+    qPeakMinute:qPeakHour/60,
+    alkalinityLoad:q*(v.alkalinity||0)/1000,
+    bodCodRatio:v.cod>0?v.bod/v.cod:null,
+    loads:Object.fromEntries(pollutants.map(p=>[p.key,q*(v[p.key]||0)/1000]))
+  };
+}
+function render(){const v=values(),err=validate(v);const validationEl=$('validation');if(validationEl)validationEl.textContent=err.length?'Cần kiểm tra: '+err.join('; '):'Dữ liệu hợp lệ.';$('resultStatus').textContent=err.length?'Có lỗi đầu vào':'Đã cập nhật';$('statusSave').textContent=err.length?'● Kiểm tra dữ liệu':'● Sẵn sàng';if(err.length){['rQ','rQh','rBod','rCod'].forEach(k=>$(k).textContent='—');$('rows').replaceChildren();return}const r=calc(v);
+const inputRows=$('inputRows');inputRows.replaceChildren();
+const inputLabels={ph:'pH đầu vào',qavg:'Lưu lượng trung bình ngày Qtb (m³/ngày)',kpeak:'Hệ số không điều hòa K (-)',hours:'Thời gian hoạt động (giờ/ngày)',bod:'BOD₅ (mg/L)',cod:'COD (mg/L)',tss:'TSS (mg/L)',tn:'Tổng Nitơ (TN) (mg/L)',nh4:'Amoni (tính theo N) (mg/L)',tp:'Tổng Phốt pho (TP) (mg/L)',alkalinity:'Độ kiềm tổng (mg/L theo CaCO₃)',oilgrease:'Dầu mỡ (mg/L)',temperature:'Nhiệt độ (°C)'};
+const addRow=(tbody,values)=>{const tr=document.createElement('tr');values.forEach((x,i)=>{const td=document.createElement('td');td.textContent=(x===null||x===undefined||String(x).trim()==='')?'—':x;if(i>0)td.style.fontVariantNumeric='tabular-nums';tr.appendChild(td)});tbody.appendChild(tr)};
+addRow(inputRows,['Loại nước thải','—',$('projectType').value==='Khác'?($('otherWastewaterType').value||'Khác'): $('projectType').value]);
+for(const [key,label] of Object.entries(inputLabels)){const val=v[key];addRow(inputRows,[label,'—',val===null?'—':fmt(val)]);}
+const tbody=$('rows');tbody.replaceChildren();
+
+addRow(tbody,['Lưu lượng giờ (m³/giờ)',fmt(r.qHour)]);
+addRow(tbody,['Lưu lượng phút (m³/phút)',fmt(r.qMinute)]);
+addRow(tbody,['Lưu lượng giờ đỉnh (m³/giờ)',fmt(r.qh)]);
+addRow(tbody,['Lưu lượng phút đỉnh (m³/phút)',fmt(r.qPeakMinute)]);
+addRow(tbody,['Tải lượng kiềm (kg CaCO₃/ngày)',fmt(r.alkalinityLoad)]);
+addRow(tbody,['Tỷ số BOD₅/COD (-)',r.bodCodRatio===null?'—':fmt(r.bodCodRatio)]);
+for(const p of pollutants){addRow(tbody,[`Tải lượng ${p.label} (kg/ngày)`,fmt(r.loads[p.key])]);}}
+function apply(v){for(const [k,s] of Object.entries(schema)){const e=document.querySelector(`[data-key="${k}"]`);e.value=v[k]===null||v[k]===undefined?'':String(v[k])}render()}
+function snapshot(){
+  const existing=currentProjectId?readRegistry().find(p=>String(p.id)===String(currentProjectId)):null;
+  return{
+    schemaVersion:1,app:'ECS — Environmental Calculation System',
+    project:{...(existing?.project||{}),...readProjectForm()},
+    module:currentModule,inputs:values(),
+    technology:{units:technologyUnits.map(unit=>deepCopy(unit))},
+    savedAt:new Date().toISOString()
+  };
+}
+function download(filename,content){const blob=new Blob([content],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=filename;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000)}
+document.querySelectorAll('[data-key]').forEach(e=>e.addEventListener('input',()=>{render();projectDirty=true;$('statusSave').textContent='● Có thay đổi chưa lưu'}));
+document.querySelectorAll('#projectOwner,#projectContact,#projectLocation,#designCompany,#designCompanyAddress,#projectCapacity,#projectDescription,#projectTypeModal,#designBasisModal').forEach(e=>e.addEventListener('input',()=>{projectDirty=true;$('statusSave').textContent='● Có thay đổi chưa lưu'}));
+$('projectType').addEventListener('change',()=>{
+  $('otherWastewaterTypeField').hidden=$('projectType').value!=='Khác';
+  $('projectTypeModal').value=$('projectType').value;
+  projectDirty=true;$('statusSave').textContent='● Có thay đổi chưa lưu';
+});
+$('otherWastewaterType').addEventListener('input',()=>{
+  projectDirty=true;$('statusSave').textContent='● Có thay đổi chưa lưu';
+});
+document.querySelectorAll('input[name="designFields"]').forEach(e=>e.addEventListener('change',()=>{projectDirty=true;$('statusSave').textContent='● Có thay đổi chưa lưu'}));
+function resetInputs(){apply(Object.fromEntries(Object.entries(schema).map(([k,s])=>[k,s.default])))}
+function newProject(){
+  requestSaveDecision(()=>{
+    currentProjectId=null;projectDirty=false;isCreatingProject=true;designAccessGranted=false;syncDesignAccess();
+    $('projectName').value='Dự án mới';
+    ['projectOwner','projectContact','projectLocation','designCompany','designCompanyAddress','projectCapacity','projectDescription'].forEach(id=>$(id).value='');
+    $('projectTypeModal').selectedIndex=0;$('designBasisModal').selectedIndex=0;
+    $('projectType').value=$('projectTypeModal').value;$('designBasis').value=$('designBasisModal').value;
+    resetInputs();
+    $('statusProject').textContent='Dự án: '+$('projectName').value;
+    $('statusSave').textContent='● Dự án mới chưa lưu';
+    openProjectDetails();
+  });
+}
+function exportJson(){const d=currentSnapshot();download((projectTitle(d).replace(/[^\p{L}\p{N}_-]+/gu,'_').slice(0,60)||'ECE_Project')+'.json',JSON.stringify(d,null,2))}
+function saveLocal(){saveCurrentToRegistry(true)}
+
+function discardUnsavedProjectChanges(){
+  if(currentProjectId){
+    const saved=readRegistry().find(p=>String(p.id)===String(currentProjectId));
+    if(saved){
+      loadProjectData(saved);
+      currentProjectId=saved.id;
+      designAccessGranted=true;
+      syncDesignAccess();
+    }else{
+      currentProjectId=null;
+      designAccessGranted=false;
+      resetInputs();
+    }
+  }else{
+    currentProjectId=null;
+    designAccessGranted=false;
+    resetInputs();
+    $('projectName').value='Dự án mới';
+    ['projectOwner','projectContact','projectLocation','projectCapacity','projectDescription'].forEach(id=>$(id).value='');
+    $('projectTypeModal').selectedIndex=0;
+    $('designBasisModal').selectedIndex=0;
+    $('projectType').value=$('projectTypeModal').value;
+    $('designBasis').value=$('designBasisModal').value;
+    $('statusProject').textContent='Chưa chọn dự án';
+  }
+  isCreatingProject=false;
+  projectDirty=false;
+  syncDesignAccess();
+  $('statusSave').textContent=currentProjectId?'● Đã mở dự án':'● Chưa chọn dự án';
+}
+function requestSaveDecision(onContinue){
+  const unsavedNewProject=isCreatingProject&&!currentProjectId;
+  if(!(projectDirty||unsavedNewProject)){onContinue();return;}
+  document.getElementById('ecsSaveDecision')?.remove();
+
+  const overlay=document.createElement('div');
+  overlay.id='ecsSaveDecision';
+  overlay.className='ecs-decision-overlay';
+  overlay.innerHTML=`
+    <section class="ecs-decision-dialog ecs-decision-simple" role="dialog" aria-modal="true" aria-labelledby="ecsDecisionTitle">
+      <div class="ecs-decision-content">
+        <h2 id="ecsDecisionTitle">Dự án chưa lưu</h2>
+        <p>Bạn có muốn lưu trước khi rời trang?</p>
+        <div class="ecs-decision-actions">
+          <button type="button" class="ecs-decision-discard" data-decision="discard">Không lưu</button>
+          <button type="button" class="ecs-decision-save" data-decision="save">Lưu</button>
+        </div>
+      </div>
+    </section>`;
+  document.body.appendChild(overlay);
+
+  const discard=overlay.querySelector('[data-decision="discard"]');
+  const save=overlay.querySelector('[data-decision="save"]');
+  discard.addEventListener('click',()=>{
+    discardUnsavedProjectChanges();
+    overlay.remove();
+    onContinue();
+  });
+  save.addEventListener('click',()=>{
+    if(!saveCurrentToRegistry(false)){
+      showToast('Không thể lưu dự án. Vui lòng kiểm tra tên dự án.','error',5000);
+      return;
+    }
+    isCreatingProject=false;
+    projectDirty=false;
+    $('statusSave').textContent='● Đã lưu dự án';
+    overlay.remove();
+    onContinue();
+  });
+  overlay.addEventListener('click',e=>{if(e.target===overlay){}});
+  save.focus();
+}
+function openImport(){$('jsonFile').click()}
+function exitApp(){
+  requestSaveDecision(()=>{
+    if(confirm('Thoát ứng dụng? Trình duyệt chỉ cho phép đóng tab do mã này mở. Nếu tab không được đóng, hãy đóng tab thủ công.')){
+      window.close();
+      setTimeout(()=>{if(!window.closed)alert('Trình duyệt đã chặn việc tự đóng tab. Vui lòng đóng tab thủ công.');},150);
+    }
+  });
+}
+function toggleInspector(){$('inspector').classList.toggle('hidden')}
+$('projectName').addEventListener('input',()=>{
+  $('statusProject').textContent='Dự án: '+$('projectName').value;
+  projectDirty=true;$('statusSave').textContent='● Có thay đổi chưa lưu';
+});
+['projectOwner','projectContact','projectLocation','projectCapacity','projectDescription'].forEach(id=>{
+  $(id).addEventListener('input',()=>{projectDirty=true;$('statusSave').textContent='● Có thay đổi chưa lưu'});
+});
+$('projectTypeModal').addEventListener('change',()=>{$('projectType').value=$('projectTypeModal').value;projectDirty=true});
+$('designBasisModal').addEventListener('change',()=>{$('designBasis').value=$('designBasisModal').value;projectDirty=true});
+let projectDraft=null;
+function readProjectForm(){return{name:$('projectName').value,owner:$('projectOwner').value,contact:$('projectContact').value,location:$('projectLocation').value,designCompany:$('designCompany').value,designCompanyAddress:$('designCompanyAddress').value,capacity:$('projectCapacity').value,description:$('projectDescription').value,designFields:[...document.querySelectorAll('input[name="designFields"]:checked')].map(e=>e.value),projectType:$('projectType').value,otherWastewaterType:$('otherWastewaterType').value,designBasis:$('designBasisModal').value}}
+function setProjectForm(p){$('projectName').value=p.name||'Dự án mới';$('projectOwner').value=p.owner||'';$('projectContact').value=p.contact||'';$('projectLocation').value=p.location||'';$('designCompany').value=p.designCompany||'';$('designCompanyAddress').value=p.designCompanyAddress||'';$('projectCapacity').value=p.capacity||'';$('projectDescription').value=p.description||'';const selected=Array.isArray(p.designFields)?p.designFields:[];document.querySelectorAll('input[name="designFields"]').forEach(e=>e.checked=selected.includes(e.value));$('projectTypeModal').value=p.projectType||'Sinh hoạt';$('projectType').value=p.projectType||'Sinh hoạt';$('otherWastewaterType').value=p.otherWastewaterType||'';$('otherWastewaterTypeField').hidden=$('projectType').value!=='Khác';$('designBasisModal').value=p.designBasis||'Q trung bình ngày'}
+function renderProjectSummary(p){/* Thông tin dự án được nhập trực tiếp trên biểu mẫu; không cần bảng tóm tắt. */}
+let returnToHomeAfterProject=false;
+let isCreatingProject=false;
+function openProjectDetails(){returnToHomeAfterProject=$('homePage').classList.contains('hidden')===false;projectDraft=readProjectForm();$('projectTypeModal').value=$('projectType').value;$('designBasisModal').value=$('designBasis').value;projectDraft=readProjectForm();renderProjectSummary(projectDraft);$('projectPageStatus').textContent=isCreatingProject?'Nhập thông tin dự án mới':'Đang chỉnh sửa';$('applyProjectEdit').textContent='Lưu dự án';$('projectPage').classList.remove('hidden');$('homePage').classList.add('hidden');document.querySelector('.workspace').classList.add('hidden');closeMenus()}
+function closeProjectDetails(restore){if(restore&&projectDraft)setProjectForm(projectDraft);$('projectPage').classList.add('hidden');if(returnToHomeAfterProject){$('homePage').classList.remove('hidden');document.querySelector('.workspace').classList.add('hidden')}else{document.querySelector('.workspace').classList.remove('hidden')}}
+function continueToLoadingWithoutSaving(){
+  $('projectType').value=$('projectTypeModal').value;
+  $('designBasis').value=$('designBasisModal').value;
+  const p=readProjectForm();
+  if(p.name.trim())$('statusProject').textContent='Dự án: '+p.name;
+  renderProjectSummary(p);
+  if(isCreatingProject){
+    $('statusSave').textContent='● Dự án mới chưa lưu';
+  }else{
+    projectDirty=true;
+    $('statusSave').textContent='● Có thay đổi chưa lưu';
+  }
+  closeProjectDetails(false);
+  showDomainSelection();
+}
+function showSaveBeforeLoadingDialog(){
+  document.getElementById('wwtcSaveBeforeLoading')?.remove();
+  const overlay=document.createElement('div');
+  overlay.id='wwtcSaveBeforeLoading';
+  overlay.style.cssText='position:fixed;inset:0;z-index:100000;background:rgba(15,25,20,.58);backdrop-filter:blur(3px);display:flex;align-items:center;justify-content:center;padding:18px;';
+  const dialog=document.createElement('section');
+  dialog.setAttribute('role','dialog');
+  dialog.setAttribute('aria-modal','true');
+  dialog.style.cssText='width:min(390px,100%);background:#fff;border:1px solid #e1e9e3;border-radius:16px;padding:22px;box-shadow:0 18px 60px rgba(0,0,0,.24);font:14px/1.5 system-ui,sans-serif;color:#203128;';
+  const title=document.createElement('h2');
+  title.textContent='Dự án chưa được lưu';
+  title.style.cssText='margin:0 0 8px;font-size:19px;color:#193c2b;';
+  const message=document.createElement('p');
+  message.textContent='Bạn muốn tiếp tục tạo dự án hay lưu để bắt đầu thiết kế?';
+  message.style.cssText='margin:0 0 20px;color:#59685f;';
+  const buttons=document.createElement('div');
+  buttons.style.cssText='display:flex;justify-content:flex-end;flex-wrap:wrap;gap:8px;';
+  const keepEditing=document.createElement('button');
+  keepEditing.type='button';
+  keepEditing.textContent='Tiếp tục tạo dự án mới';
+  keepEditing.style.cssText='border:1px solid #d8e1da;background:#fff;color:#285c40;border-radius:9px;padding:10px 12px;cursor:pointer;font-weight:600;';
+  keepEditing.addEventListener('click',()=>overlay.remove());
+
+  const save=document.createElement('button');
+  save.type='button';save.textContent='Lưu và bắt đầu';
+  save.style.cssText='border:1px solid #176b45;background:#176b45;color:#fff;border-radius:9px;padding:10px 14px;cursor:pointer;font-weight:600;';
+  save.addEventListener('click',()=>{
+    const p=readProjectForm();
+    if(!p.name.trim()){alert('Vui lòng nhập tên dự án trước khi lưu.');$('projectName').focus();return;}
+    $('projectType').value=$('projectTypeModal').value;
+    $('designBasis').value=$('designBasisModal').value;
+    if(!saveCurrentToRegistry(false)){alert('Không thể lưu dự án. Vui lòng kiểm tra lại tên và thử lại.');return;}
+    isCreatingProject=false;projectDirty=false;overlay.remove();closeProjectDetails(false);showDomainSelection();
+    alert('Lưu dự án thành công.');
+  });
+  dialog.append(title,message,buttons);
+  buttons.append(keepEditing,save);
+  overlay.append(dialog);
+  document.body.append(overlay);
+  keepEditing.focus();
+}
+$('cancelProjectEdit').addEventListener('click',()=>{
+  const unsavedNewProject=isCreatingProject&&!currentProjectId;
+  if(projectDirty||unsavedNewProject){
+    showSaveBeforeLoadingDialog();
+    return;
+  }
+  continueToLoadingWithoutSaving();
+});
+$('applyProjectEdit').addEventListener('click',()=>{
+  const p=readProjectForm();
+  if(!p.name.trim()){alert('Vui lòng nhập tên dự án trước khi lưu.');$('projectName').focus();return;}
+  $('projectType').value=p.projectType;$('designBasis').value=p.designBasis;
+  $('statusProject').textContent='Dự án: '+p.name;renderProjectSummary(p);
+  if(!saveCurrentToRegistry(false)){
+    $('projectPageStatus').textContent='Chưa lưu được';
+    return;
+  }
+  isCreatingProject=false;
+  projectDirty=false;
+  $('projectPageStatus').textContent='Đã lưu thành công';
+  $('statusSave').textContent='● Đã lưu dự án';
+  showToast('Đã lưu dự án thành công.','success',3500);
+});
+document.querySelectorAll('[data-domain]').forEach(b=>b.addEventListener('click',()=>selectDomain(b.dataset.domain)));
+$('backToDomains').addEventListener('click',showDomainSelection);
+$('backToProject').addEventListener('click',openProjectDetails);
+const actions={home:showHome,newProject,openProjectDetails,openImport,export:exportJson,saveLocal,toggleInspector,exitApp};
+document.querySelectorAll('[data-action]').forEach(b=>b.addEventListener('click',()=>{
+  if(b.dataset.action==='openProjectDetails'&&!hasActiveSavedProject()){
+    syncDesignAccess();
+    closeMenus();
+    showToast('Mở dự án đã lưu hoặc tạo và lưu dự án mới trước khi xem thông tin dự án.','warning',4500);
+    return;
+  }
+  if(b.dataset.action==='saveLocal'&&!hasActiveSavedProject()&&!isCreatingProject){
+    syncDesignAccess();
+    closeMenus();
+    showToast('Vui lòng mở dự án đã lưu hoặc tạo dự án mới trước khi lưu.','warning',4500);
+    return;
+  }
+  actions[b.dataset.action]?.();
+  closeMenus();
+}));
+$('homeNewProject').addEventListener('click',newProject);
+$('homeImportProject').addEventListener('click',openImport);
+
+function validateImportedProject(source,fileName){
+  if(!source||typeof source!=='object'||Array.isArray(source))throw new Error('Tệp JSON không chứa một đối tượng dự án hợp lệ.');
+  const sourceInputs=source.inputs||source.data?.inputs;
+  if(!sourceInputs||typeof sourceInputs!=='object'||Array.isArray(sourceInputs))throw new Error('JSON không có trường inputs hợp lệ.');
+  const mergedInputs={};
+  for(const [key,rule] of Object.entries(schema)){
+    const value=Object.prototype.hasOwnProperty.call(sourceInputs,key)?sourceInputs[key]:rule.default;
+    if(value===null&&['qmanual','oilgrease','temperature'].includes(key)){mergedInputs[key]=null;continue}
+    if(value===null||value===undefined||!Number.isFinite(Number(value)))throw new Error('Thông số '+key+' không phải số hợp lệ.');
+    const n=Number(value);
+    if(rule.min!==undefined&&n<rule.min)throw new Error('Thông số '+key+' nhỏ hơn giới hạn cho phép.');
+    if(rule.max!==undefined&&n>rule.max)throw new Error('Thông số '+key+' vượt giới hạn cho phép.');
+    mergedInputs[key]=n;
+  }
+  // Giữ lại cả các trường mở rộng để tương thích với các phiên bản dữ liệu sau này.
+  Object.keys(sourceInputs).forEach(key=>{if(!(key in mergedInputs))mergedInputs[key]=sourceInputs[key]});
+  const sourceProject=source.project&&typeof source.project==='object'&&!Array.isArray(source.project)?source.project:{};
+  const projectName=sourceProject.name||String(fileName||'').replace(/\.json$/i,'')||'Dự án nhập';
+  const technology=source.technology&&typeof source.technology==='object'?deepCopy(source.technology):{units:[]};
+  if(technology.units!==undefined&&!Array.isArray(technology.units))throw new Error('Danh sách công trình trong JSON không hợp lệ.');
+  if(!Array.isArray(technology.units))technology.units=[];
+  return {
+    ...deepCopy(source),
+    id:makeId(),
+    project:{...deepCopy(sourceProject),name:projectName},
+    inputs:mergedInputs,
+    technology,
+    savedAt:new Date().toISOString(),
+    updatedAt:new Date().toISOString()
+  };
+}
+$('jsonFile').addEventListener('change',async e=>{
+  const f=e.target.files?.[0];if(!f)return;
+  try{
+    const source=JSON.parse(await f.text());
+    const imported=validateImportedProject(source,f.name);
+    const projects=readRegistry();
+    projects.unshift(imported);
+    writeRegistry(projects);
+    loadProjectData(imported);currentProjectId=imported.id;projectDirty=false;isCreatingProject=false;
+    designAccessGranted=true;syncDesignAccess();showWorkspace();renderSavedProjects();
+    showToast('Đã nhập dự án và bảo toàn thông tin, công trình cùng dữ liệu tính toán.','success',4500);
+  }catch(err){
+    showToast('Nhập JSON thất bại: '+(err?.message||'Dữ liệu không hợp lệ.'),'error',6000);
+  }
+  e.target.value='';
+});
+document.querySelectorAll('[data-module]').forEach(b=>b.addEventListener('click',()=>{const m=b.dataset.module;if(m!=='load'){alert('Module '+b.textContent.trim()+' sẽ được phát triển sau khi nghiệm thu Tải lượng.');return}currentModule=m;document.querySelectorAll('[data-module]').forEach(x=>x.classList.toggle('active',x===b));$('inputHeading').textContent='Dữ liệu tải lượng'}));
+
+function closeMenus(){document.querySelectorAll('.menuwrap.open').forEach(w=>w.classList.remove('open'));document.querySelectorAll('[data-menu]').forEach(b=>b.setAttribute('aria-expanded','false'))}
+document.querySelectorAll('[data-menu]').forEach(b=>b.addEventListener('click',e=>{
+  e.stopPropagation();
+  if(b.dataset.menu==='design'&&!hasActiveSavedProject()){
+    syncDesignAccess();closeMenus();
+    showToast('Vui lòng mở một dự án đã lưu hoặc tạo và lưu dự án mới trước khi truy cập Thiết kế.','error',4500);
+    return;
+  }
+  const wrap=b.closest('.menuwrap'),wasOpen=wrap.classList.contains('open');
+  closeMenus();
+  if(!wasOpen){wrap.classList.add('open');b.setAttribute('aria-expanded','true')}
+  document.querySelectorAll('[data-menu]').forEach(x=>x.classList.toggle('active',x===b));
+}));
+document.addEventListener('click',closeMenus);
+document.querySelectorAll('[data-design-domain]').forEach(b=>b.addEventListener('click',()=>{
+  if(!hasActiveSavedProject()){syncDesignAccess();closeMenus();showToast('Vui lòng mở hoặc lưu dự án trước khi thiết kế.','error',4500);return;}
+  selectDomain(b.dataset.designDomain);closeMenus();
+}));
+
+
+const TECHNOLOGY_CATALOG=[
+  {group:'Thu gom – điều hòa',items:['Hố thu gom','Bể điều hòa','Hầm bơm']},
+  {group:'Xử lý cơ học',items:['Song chắn rác','Bể lắng cát','Bể tách dầu mỡ']},
+  {group:'Hóa lý',items:['Bể phản ứng','Bể keo tụ','Bể tạo bông','Bể tuyển nổi DAF']},
+  {group:'Sinh học',items:['Bể Anoxic','Bể Aerotank','Bể SBR','Bể MBR','Bể MBBR','Bể UASB']},
+  {group:'Lắng – lọc',items:['Bể lắng sinh học','Bể lắng hóa lý','Bể lọc áp lực','Lọc than hoạt tính']},
+  {group:'Khử trùng',items:['Bể khử trùng','Hệ thống châm Clo']},
+  {group:'Xử lý bùn',items:['Bể chứa bùn','Bể nén bùn','Máy ép bùn']}
+];
+let technologyUnits=[];
+let activeUnitId=null;
+function makeUnitId(){return 'unit-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,8)}
+function persistTechnology(){
+  if(!currentProjectId){showToast('Vui lòng lưu dự án trước khi chọn công nghệ.','error');return false}
+  try{
+    const projects=readRegistry(),idx=projects.findIndex(p=>String(p.id)===String(currentProjectId));
+    if(idx<0){showToast('Không tìm thấy dự án để tự động lưu.','error');return false}
+    const d=currentSnapshot();d.technology={units:technologyUnits.map(x=>deepCopy(x))};
+    projects[idx]={...projects[idx],...d};writeRegistry(projects);
+    projectDirty=false;$('statusSave').textContent='● Đã tự động lưu';
+    return true;
+  }catch(e){showToast('Không thể tự động lưu thay đổi. Hãy kiểm tra dung lượng lưu trữ trình duyệt.','error',5000);return false}
+}
+function confirmTechnologyAction(title,message,onConfirm){
+  document.getElementById('ecsTechnologyConfirm')?.remove();
+
+  const overlay=document.createElement('div');
+  overlay.id='ecsTechnologyConfirm';
+  overlay.style.cssText=[
+    'position:fixed','inset:0','z-index:200001',
+    'display:flex','align-items:center','justify-content:center',
+    'padding:16px','background:rgba(20,34,27,.52)',
+    'backdrop-filter:blur(2px)','-webkit-backdrop-filter:blur(2px)'
+  ].join(';');
+
+  const dialog=document.createElement('section');
+  dialog.setAttribute('role','alertdialog');
+  dialog.setAttribute('aria-modal','true');
+  dialog.setAttribute('aria-labelledby','ecsTechnologyConfirmTitle');
+  dialog.setAttribute('aria-describedby','ecsTechnologyConfirmMessage');
+  dialog.style.cssText=[
+    'box-sizing:border-box','width:min(440px,100%)','max-width:440px',
+    'background:#fff','border:1px solid #dce5df','border-radius:16px',
+    'padding:24px','box-shadow:0 20px 60px rgba(14,35,23,.24)',
+    'font-family:inherit'
+  ].join(';');
+
+  const headingRow=document.createElement('div');
+  headingRow.style.cssText='display:flex;align-items:center;gap:12px;margin:0 0 13px';
+
+  const icon=document.createElement('span');
+  icon.setAttribute('aria-hidden','true');
+  icon.textContent='!';
+  icon.style.cssText=[
+    'display:grid','place-items:center','flex:0 0 36px',
+    'width:36px','height:36px','border-radius:50%',
+    'background:#fff0ef','color:#b43c37','font-size:20px',
+    'font-weight:750','line-height:1'
+  ].join(';');
+
+  const heading=document.createElement('h2');
+  heading.id='ecsTechnologyConfirmTitle';
+  heading.textContent=title;
+  heading.style.cssText='margin:0;color:#203b2e;font-size:19px;font-weight:720;line-height:1.3;letter-spacing:-.01em';
+
+  const body=document.createElement('p');
+  body.id='ecsTechnologyConfirmMessage';
+  body.textContent=message;
+  body.style.cssText='margin:0 0 23px;color:#5e6e64;font-size:15px;line-height:1.55;overflow-wrap:anywhere';
+
+  const actions=document.createElement('div');
+  actions.style.cssText='display:flex;align-items:stretch;justify-content:flex-end;gap:10px;width:100%';
+
+  const cancel=document.createElement('button');
+  cancel.type='button';
+  cancel.textContent='Hủy';
+  cancel.className='btn back-button';
+  cancel.style.cssText=[
+    'box-sizing:border-box','flex:1 1 0','min-width:0','min-height:46px',
+    'padding:10px 16px','border:1px solid #cfdcd3','border-radius:9px',
+    'background:#f4f8f5','color:#315b42','font:650 14px/1.2 inherit',
+    'cursor:pointer'
+  ].join(';');
+
+  const accept=document.createElement('button');
+  accept.type='button';
+  accept.textContent='Xóa công trình';
+  accept.style.cssText=[
+    'box-sizing:border-box','flex:1 1 0','min-width:0','min-height:46px',
+    'padding:10px 16px','border:1px solid #b83e39','border-radius:9px',
+    'background:#b83e39','color:#fff','font:700 14px/1.2 inherit',
+    'cursor:pointer','box-shadow:0 2px 4px rgba(145,42,38,.14)'
+  ].join(';');
+
+  const close=()=>{overlay.remove();document.removeEventListener('keydown',onKey)};
+  const onKey=e=>{if(e.key==='Escape')close()};
+  cancel.addEventListener('click',close);
+  accept.addEventListener('click',()=>{close();onConfirm()});
+  overlay.addEventListener('click',e=>{if(e.target===overlay)close()});
+  cancel.addEventListener('focus',()=>{cancel.style.outline='2px solid #78a489';cancel.style.outlineOffset='2px'});
+  cancel.addEventListener('blur',()=>{cancel.style.outline='none'});
+  accept.addEventListener('focus',()=>{accept.style.outline='2px solid #d98b87';accept.style.outlineOffset='2px'});
+  accept.addEventListener('blur',()=>{accept.style.outline='none'});
+
+  headingRow.append(icon,heading);
+  actions.append(cancel,accept);
+  dialog.append(headingRow,body,actions);
+  overlay.append(dialog);
+  document.body.append(overlay);
+  document.addEventListener('keydown',onKey);
+  cancel.focus();
+}
+function removeTechnologyUnit(id){
+  const unit=technologyUnits.find(x=>x.id===id);if(!unit)return;
+  confirmTechnologyAction('Xóa công trình',`Xóa "${unit.name}" và toàn bộ kết quả tính toán liên quan?`,()=>{
+    technologyUnits=technologyUnits.filter(x=>x.id!==id);
+    if(activeUnitId===id)activeUnitId=null;
+    if(!persistTechnology())return;
+    renderTechnologyCatalog();renderSelectedUnits();
+  });
+}
+function removeCatalogType(name){
+  const matches=technologyUnits.filter(x=>x.catalogName===name);
+  if(!matches.length)return;
+  confirmTechnologyAction('Bỏ chọn công trình',`Bỏ chọn ${matches.length} công trình thuộc loại "${name}" và xóa toàn bộ kết quả tính toán liên quan?`,()=>{
+    const ids=new Set(matches.map(x=>x.id));
+    technologyUnits=technologyUnits.filter(x=>!ids.has(x.id));
+    if(ids.has(activeUnitId))activeUnitId=null;
+    if(!persistTechnology())return;
+    renderTechnologyCatalog();renderSelectedUnits();
+  });
+}
+
+function renderTechnologyCatalog(){
+  const host=$('technologyCatalog');host.replaceChildren();
+  TECHNOLOGY_CATALOG.forEach(group=>{
+    const section=document.createElement('section');section.className='technology-group';
+    const title=document.createElement('h2');title.textContent=group.group;
+    const grid=document.createElement('div');grid.className='technology-items';
+    group.items.forEach(name=>{
+      const selected=technologyUnits.some(x=>x.catalogName===name);
+      const row=document.createElement('div');row.className='technology-item'+(selected?' selected':'');
+      const check=document.createElement('input');check.type='checkbox';check.checked=selected;check.setAttribute('aria-label','Chọn '+name);
+      const label=document.createElement('span');label.className='technology-item-name';label.textContent=name;
+      check.addEventListener('change',()=>{
+        if(check.checked){technologyUnits.push({id:makeUnitId(),catalogName:name,name:nextUnitName(name),status:'pending',data:{}})}
+        else{
+          check.checked=true;
+          removeCatalogType(name);
+          return;
+        }
+        if(!persistTechnology()){renderTechnologyCatalog();return}
+        renderTechnologyCatalog();renderTechnologyCount();
+      });
+      label.style.cursor='pointer';label.addEventListener('click',()=>{check.checked=!check.checked;check.dispatchEvent(new Event('change',{bubbles:true}))});row.append(check,label);grid.append(row);
+    });
+    section.append(title,grid);host.append(section);
+  });
+  const selectedPanel=document.createElement('section');selectedPanel.className='technology-group';
+  const selectedTitle=document.createElement('h2');selectedTitle.textContent='Công trình đã chọn';
+  const selectedList=document.createElement('div');selectedList.className='technology-items';
+  technologyUnits.forEach(unit=>{
+    const row=document.createElement('div');row.className='technology-item selected';
+    const name=document.createElement('input');name.type='text';name.value=unit.name;name.className='technology-item-name';name.setAttribute('aria-label','Tên công trình');
+    name.addEventListener('change',()=>renameTechnologyUnit(unit.id,name.value));
+    const actions=document.createElement('div');actions.className='technology-item-actions';
+    const duplicate=document.createElement('button');duplicate.type='button';duplicate.className='technology-action-duplicate';duplicate.textContent='Nhân đôi';duplicate.title='Nhân đôi công trình';
+    duplicate.addEventListener('click',()=>{const clone=typeof structuredClone==='function'?structuredClone(unit):JSON.parse(JSON.stringify(unit));const copy={...clone,id:makeUnitId(),name:nextUnitName(unit.catalogName),status:unit.status||'pending'};technologyUnits.push(copy);if(!persistTechnology()){technologyUnits=technologyUnits.filter(x=>x.id!==copy.id);return}renderTechnologyCatalog();renderSelectedUnits()});
+    const remove=document.createElement('button');remove.type='button';remove.className='technology-action-delete';remove.textContent='Xóa';remove.title='Xóa công trình';
+    remove.addEventListener('click',()=>removeTechnologyUnit(unit.id));
+    actions.append(duplicate,remove);row.append(name,actions);selectedList.append(row);
+  });
+  selectedPanel.append(selectedTitle,selectedList);host.append(selectedPanel);
+  renderTechnologyCount();
+}
+function nextUnitName(base){
+  const existing=technologyUnits.map(x=>x.name);
+  if(!existing.includes(base))return base;
+  let n=2;while(existing.includes(base+' '+n))n++;
+  return base+' '+n;
+}
+function renderTechnologyCount(){$('technologyCount').textContent='Đã chọn '+technologyUnits.length+' công trình'}
+function showTechnology(){
+  hideMainPages();$('technologySelectionPage').classList.remove('hidden');renderTechnologyCatalog();
+}
+function renderSelectedUnits(){
+  const host=$('selectedUnitCards');host.replaceChildren();
+  technologyUnits.forEach(unit=>{
+    const card=document.createElement('button');card.type='button';card.className='unit-process-card';
+    const name=document.createElement('strong');name.textContent=unit.name;
+    const status=document.createElement('span');status.className='unit-status'+(unit.status==='done'?' done':'');status.textContent=unit.status==='done'?'Đã tính':'Chưa tính';
+    card.append(name,status);
+    if(unit.catalogName==='Hầm bơm'&&unit.data&&unit.data.pumpWell){
+      const d=unit.data.pumpWell,calcResult=pumpWellCalculation(d);
+      if(calcResult.valid){
+        const summary=document.createElement('div');summary.className='unit-process-summary';
+        const dimension=document.createElement('div');dimension.className='unit-summary-line';
+        const dimensionLabel=document.createElement('span');dimensionLabel.textContent='Kích thước';
+        const dimensionValue=document.createElement('strong');
+        dimensionValue.textContent=d.geometry==='circle'
+          ?'D '+fmt(calcResult.diameter)+' × H '+fmt(calcResult.totalHeight)+' m'
+          :'L '+fmt(calcResult.length)+' × B '+fmt(calcResult.width)+' × H '+fmt(calcResult.totalHeight)+' m';
+        dimension.append(dimensionLabel,dimensionValue);
+        const retention=document.createElement('div');retention.className='unit-summary-line';
+        const retentionLabel=document.createElement('span');retentionLabel.textContent='Thời gian lưu';
+        const retentionValue=document.createElement('strong');retentionValue.textContent=fmt(d.storageMinutes)+' phút';
+        retention.append(retentionLabel,retentionValue);
+        const volume=document.createElement('div');volume.className='unit-summary-line';
+        const volumeLabel=document.createElement('span');volumeLabel.textContent='Thể tích hiện tại';
+        const volumeValue=document.createElement('strong');volumeValue.textContent=fmt(calcResult.actual)+' m³';
+        volume.append(volumeLabel,volumeValue);
+        summary.append(dimension,retention,volume);card.append(summary);
+      }
+    }
+    const hint=document.createElement('span');hint.className='unit-status';hint.textContent='Nhấn để mở công trình →';
+    card.append(hint);card.addEventListener('click',()=>openUnitDetail(unit.id));host.append(card);
+  });
+}
+function showUnitCards(){hideMainPages();$('unitCardsPage').classList.remove('hidden');renderSelectedUnits()}
+let activeUnitTab='input';
+const deepCopy=value=>typeof structuredClone==='function'?structuredClone(value):JSON.parse(JSON.stringify(value));
+function activeUnit(){return technologyUnits.find(x=>x.id===activeUnitId)||null}
+function pumpWellDefaults(){
+  const v=values(),errors=validate(v),qh=errors.length?null:calc(v).qh;
+  return {qmaxh:qh,qmaxhOverride:false,storageMinutes:30,waterDepth:2,freeboard:.3,geometry:'square',width:1.5,length:1.5,diameter:1.5,dimensionsOverride:false};
+}
+function ensurePumpWell(unit){
+  if(!unit.data)unit.data={};
+  if(!unit.data.pumpWell)unit.data.pumpWell=pumpWellDefaults();
+  const d=unit.data.pumpWell;
+  if(!d.qmaxhOverride){const v=values();d.qmaxh=validate(v).length?null:calc(v).qh}
+  updateAutoPumpDimensions(d);return d;
+}
+function updateAutoPumpDimensions(d){
+  if(d.dimensionsOverride)return;
+  const q=Number(d.qmaxh),t=Number(d.storageMinutes),h=Number(d.waterDepth),w=Number(d.width);
+  if(!(q>0&&t>0&&h>0))return;
+  const volume=q*t/60;
+  if(d.geometry==='square'){const side=Math.sqrt(volume/h);d.width=side;d.length=side}
+  else if(d.geometry==='rectangle'&&w>0)d.length=volume/(w*h);
+  else if(d.geometry==='circle')d.diameter=Math.sqrt(4*volume/(Math.PI*h));
+}
+function pumpWellCalculation(d){
+  const q=Number(d.qmaxh),t=Number(d.storageMinutes),h=Number(d.waterDepth),free=Number(d.freeboard);
+  const valid=[q,t,h,free].every(Number.isFinite)&&q>0&&t>0&&h>0&&free>=0;
+  if(!valid)return {valid:false};
+  const required=q*t/60;
+  let length=Number(d.length),width=Number(d.width),diameter=Number(d.diameter),actual=0;
+  if(d.geometry==='square'){width=Number(d.width);length=width;actual=length*width*h}
+  else if(d.geometry==='rectangle'){actual=length*width*h}
+  else {actual=Math.PI*diameter*diameter/4*h}
+  const totalHeight=h+free,ratio=required>0?actual/required:0;
+  return {valid:true,required,actual,length,width,diameter,totalHeight,ratio,pass:actual+1e-9>=required,deficit:Math.max(0,required-actual)};
+}
+function saveActiveUnitData(){
+  const unit=activeUnit();if(!unit)return false;
+  unit.data=unit.data||{};
+  if(unit.catalogName==='Hầm bơm')unit.status=pumpWellCalculation(ensurePumpWell(unit)).valid?'done':'pending';
+  if(!persistTechnology())return false;
+  renderSelectedUnits();return true;
+}
+function showFormulaDialog(title,lines){
+  const overlay=document.createElement('div');overlay.className='ecs-formula-dialog';
+  const box=document.createElement('div'),heading=document.createElement('h3');heading.textContent=title;
+  const content=document.createElement('div');lines.forEach(line=>{const p=document.createElement('p');p.textContent=line;content.append(p)});
+  const close=document.createElement('button');close.type='button';close.className='btn back-button';close.textContent='Đóng';close.addEventListener('click',()=>overlay.remove());
+  box.append(heading,content,close);overlay.append(box);overlay.addEventListener('click',e=>{if(e.target===overlay)overlay.remove()});document.body.append(overlay);
+}
+function detailCard(title,body){const card=document.createElement('section');card.className='ecs-detail-card';const h=document.createElement('h2');h.textContent=title;const b=document.createElement('div');b.className='ecs-detail-body';b.append(body);card.append(h,b);return card}
+function field(label,key,value,unit,opts={}){
+  const wrap=document.createElement('div');wrap.className='ecs-form-field';const l=document.createElement('label');l.textContent=label+(unit?' ('+unit+')':'');
+  const input=opts.select?document.createElement('select'):document.createElement('input');
+  if(opts.select){opts.options.forEach(([v,t])=>{const o=document.createElement('option');o.value=v;o.textContent=t;input.append(o)});input.value=value}
+  else{input.type='number';input.step='any';input.min=opts.min??0;input.value=value===null||value===undefined?'':(Number.isFinite(Number(value))?Number(value).toFixed(2).replace(/\.?0+$/,''):value);input.placeholder=opts.placeholder||''}
+  input.dataset.pumpKey=key;input.setAttribute('aria-label',label);
+  const note=opts.note?Object.assign(document.createElement('small'),{className:'ecs-field-note',textContent:opts.note}):null;
+  wrap.append(l,input);if(note)wrap.append(note);return wrap;
+}
+function renderPumpWell(tab){
+  const unit=activeUnit();if(!unit)return;
+  const d=ensurePumpWell(unit),host=$('unitDetailContent');host.replaceChildren();
+  const v=values(),qSource=validate(v).length?null:calc(v).qh;
+  if(tab==='input'){
+    const grid=document.createElement('div');grid.className='ecs-form-grid';
+    grid.append(
+      field('Lưu lượng giờ đỉnh Qmaxh','qmaxh',d.qmaxh,'m³/giờ',{note:'Mặc định liên kết từ kết quả Tải lượng. Có thể nhập giá trị riêng.'}),
+      field('Thời gian tích nước giữa 2 lần bơm','storageMinutes',d.storageMinutes,'phút',{min:.01}),
+      field('Chiều sâu nước','waterDepth',d.waterDepth,'m',{min:.01}),
+      field('Chiều cao bảo vệ','freeboard',d.freeboard,'m',{min:0}),
+      field('Hình dạng công trình','geometry',d.geometry,'',{select:true,options:[['square','Hình vuông'],['rectangle','Hình chữ nhật'],['circle','Hình tròn']]})
+    );
+    if(d.geometry==='rectangle')grid.append(field('Chiều rộng thông thủy B','width',d.width,'m',{min:.01,note:'Nhập B tại đây; chiều dài L được xác định ở tab Kích thước.'}));
+    const card=detailCard('Thông số đầu vào',grid);
+    const actions=document.createElement('div');actions.className='ecs-inline-actions';
+    const link=document.createElement('button');link.type='button';link.textContent='↻ Lấy lại Qmaxh từ Tải lượng';link.addEventListener('click',()=>{d.qmaxh=qSource;d.qmaxhOverride=false;renderPumpWell('input')});
+    actions.append(link);card.querySelector('.ecs-detail-body').append(actions);
+    host.append(card);
+    const info=document.createElement('div');info.className='ecs-status-note';info.textContent='Qmaxh nguồn hiện tại: '+(qSource===null?'Chưa có kết quả hợp lệ':fmt(qSource)+' m³/giờ')+'. Khi nhập Qmaxh trực tiếp, ECS lưu trạng thái ghi đè riêng cho công trình.';host.append(info);
+    host.querySelectorAll('[data-pump-key]').forEach(input=>input.addEventListener('change',()=>{
+      const key=input.dataset.pumpKey;d[key]=key==='geometry'?input.value:(input.value===''?null:Number(input.value));
+      if(key==='qmaxh')d.qmaxhOverride=true;
+      if(key==='geometry'){d.dimensionsOverride=false;updateAutoPumpDimensions(d);saveActiveUnitData();renderPumpWell('input');return}
+      if(key==='width'&&d.geometry==='rectangle')d.dimensionsOverride=false;
+      updateAutoPumpDimensions(d);
+      if(!saveActiveUnitData())return;renderPumpWell('input');
+    }));
+  }else if(tab==='calc'){
+    const result=pumpWellCalculation(d);
+    const body=document.createElement('div');
+    if(!result.valid){const n=document.createElement('div');n.className='ecs-status-note error';n.textContent='Thiếu hoặc sai thông số đầu vào. Kiểm tra Qmaxh, thời gian tích nước và chiều sâu nước.';body.append(n)}
+    else{
+      const table=document.createElement('table');table.className='ecs-result-table';const rows=[
+        ['Lưu lượng giờ đỉnh Qmaxh (m³/giờ)',fmt(d.qmaxh)],
+        ['Thời gian tích nước (phút)',fmt(d.storageMinutes)],
+        ['Thể tích yêu cầu (m³)',fmt(result.required)],
+        ['Thể tích hình học hiện tại (m³)',fmt(result.actual)],
+        ['Tỷ lệ đáp ứng (%)',fmt(result.ratio*100)],
+        ['Phần thể tích còn thiếu (m³)',fmt(result.deficit)]
+      ];rows.forEach((r,i)=>{const tr=document.createElement('tr');r.forEach((x,j)=>{const td=document.createElement(i===0?'th':'td');td.textContent=x;if(j===1)td.className='num';tr.append(td)});table.append(tr)});body.append(table);
+      const status=document.createElement('div');status.className='ecs-status-note'+(result.pass?'':' warn');status.textContent=result.pass?'Đạt: thể tích hình học không nhỏ hơn thể tích yêu cầu.':'Chưa đạt: thể tích hình học nhỏ hơn thể tích yêu cầu.';body.append(status);
+      const formula=document.createElement('button');formula.type='button';formula.className='ecs-formula-link';formula.textContent='Xem công thức tính';formula.addEventListener('click',()=>showFormulaDialog('Cơ sở tính toán hầm bơm',[
+        'Thể tích yêu cầu: V = Qmaxh × t / 60.',
+        'Thay số: V = '+fmt(d.qmaxh)+' × '+fmt(d.storageMinutes)+' / 60 = '+fmt(result.required)+' m³.',
+        'Công thức giả định thời gian tích nước là khoảng thời gian tích lũy thực tế giữa hai lần bơm.',
+        'Chưa cộng hệ số an toàn; thể tích tính theo kích thước thông thủy.'
+      ]));body.append(formula);
+    }
+    host.append(detailCard('Kết quả tính toán',body));
+  }else if(tab==='dimensions'){
+    const result=pumpWellCalculation(d),body=document.createElement('div');
+    if(!result.valid){const n=document.createElement('div');n.className='ecs-status-note error';n.textContent='Cần nhập đủ thông số đầu vào hợp lệ trước khi tính kích thước.';body.append(n)}
+    else{
+      const grid=document.createElement('div');grid.className='ecs-form-grid';
+      if(d.geometry==='circle')grid.append(field('Đường kính thông thủy D','diameter',d.diameter,'m',{min:.01}));
+      else if(d.geometry==='rectangle')grid.append(field('Chiều dài thông thủy L','length',d.length,'m',{min:.01}),field('Chiều rộng thông thủy W','width',d.width,'m',{min:.01}));
+      else grid.append(field('Cạnh trong L = W','width',d.width,'m',{min:.01}));
+      grid.append(field('Chiều sâu nước H','waterDepth',d.waterDepth,'m',{min:.01}),field('Chiều cao bảo vệ','freeboard',d.freeboard,'m',{min:0}));
+      body.append(grid);
+      const calculated=deepCopy(d);calculated.dimensionsOverride=false;updateAutoPumpDimensions(calculated);
+      const comparison=document.createElement('table');comparison.className='ecs-result-table';
+      const dimRows=d.geometry==='circle'?[['Đường kính D (m)',fmt(calculated.diameter),fmt(d.diameter)]]:d.geometry==='rectangle'?[['Chiều dài L (m)',fmt(calculated.length),fmt(d.length)],['Chiều rộng B (m)',fmt(calculated.width),fmt(d.width)]]:[['Cạnh L = B (m)',fmt(calculated.width),fmt(d.width)]];
+      [['Thông số','Tính toán (m)','Điều chỉnh (m)'],...dimRows].forEach((r,i)=>{const tr=document.createElement('tr');r.forEach((x,j)=>{const td=document.createElement(i===0?'th':'td');td.textContent=x;if(j>0)td.className='num';tr.append(td)});comparison.append(tr)});body.append(comparison);
+      const total=document.createElement('div');total.className='ecs-status-note';total.textContent='Chiều cao tổng = '+fmt(result.totalHeight)+' m (chiều sâu nước + chiều cao bảo vệ). Kích thước là kích thước thông thủy; chưa bao gồm chiều dày kết cấu.';body.append(total);
+      const note=document.createElement('div');note.className='ecs-status-note'+(result.pass?'':' warn');note.textContent=result.pass?'Kích thước hiện tại đáp ứng thể tích yêu cầu.':'Kích thước hiện tại thiếu '+fmt(result.deficit)+' m³; ECS giữ nguyên kích thước bạn nhập, không tự ghi đè.';body.append(note);
+      const formula=document.createElement('button');formula.type='button';formula.className='ecs-formula-link';formula.textContent='Xem công thức xác định kích thước';formula.addEventListener('click',()=>showFormulaDialog('Công thức kích thước hầm bơm',[
+        d.geometry==='square'?'Hình vuông: L = W = √(V/H).':d.geometry==='rectangle'?'Hình chữ nhật: L = V/(W×H).':'Hình tròn: D = √(4V/(π×H)).',
+        'Chiều cao tổng = H + chiều cao bảo vệ.',
+        'Chỉ kiểm tra V hình học ≥ V yêu cầu; chưa áp dụng tỷ lệ L/W hoặc giới hạn chiều sâu.'
+      ]));body.append(formula);
+    }
+    host.append(detailCard('Kích thước công trình',body));
+    host.querySelectorAll('[data-pump-key]').forEach(input=>input.addEventListener('change',()=>{
+      const key=input.dataset.pumpKey;d[key]=input.value===''?null:Number(input.value);d.dimensionsOverride=true;
+      if(d.geometry==='square')d.length=d.width;
+      saveActiveUnitData();renderPumpWell('dimensions');
+    }));
+  }else{
+    const empty=document.createElement('div');empty.className='ecs-equipment-empty';empty.textContent='Thư viện thiết bị của công trình đang để trống. Chưa triển khai chọn hoặc đề xuất thiết bị tự động.';host.append(detailCard('Thiết bị',empty));
+  }
+}
+function renderUnitDetail(){
+  const unit=activeUnit();if(!unit)return;
+  $('unitDetailTitle').textContent=unit.name;
+  $('unitDetailSubtitle').textContent=unit.catalogName==='Hầm bơm'?'Thiết kế hầm bơm — kích thước thông thủy.':'Kiến trúc tính toán chi tiết ECS; module công trình này sẽ được triển khai theo từng giai đoạn.';
+  document.querySelectorAll('[data-unit-tab]').forEach(b=>b.classList.toggle('active',b.dataset.unitTab===activeUnitTab));
+  if(unit.catalogName==='Hầm bơm')renderPumpWell(activeUnitTab);
+  else{$('unitDetailContent').replaceChildren();const note=document.createElement('div');note.className='ecs-status-note';note.textContent='Bộ thông số và công thức riêng của công trình này chưa được triển khai.';$('unitDetailContent').append(note)}
+}
+function openUnitDetail(id){
+  activeUnitId=id;const unit=technologyUnits.find(x=>x.id===id);if(!unit)return;
+  activeUnitTab='input';hideMainPages();$('unitDetailPage').classList.remove('hidden');renderUnitDetail();
+}
+function renameTechnologyUnit(id,newName){
+  const unit=technologyUnits.find(x=>x.id===id);if(!unit)return;
+  const value=String(newName||'').trim();if(!value){renderTechnologyCatalog();return}
+  const previous=unit.name;unit.name=value;
+  if(!persistTechnology()){unit.name=previous;renderTechnologyCatalog();return}
+  renderTechnologyCatalog();renderSelectedUnits();
+}
+$('backFromTechnology').addEventListener('click',()=>{hideMainPages();$('wastewaterToolsPage').classList.remove('hidden')});
+$('backFromTechnologyBottom').addEventListener('click',()=>{hideMainPages();$('wastewaterToolsPage').classList.remove('hidden')});
+
+document.querySelectorAll('[data-unit-tab]').forEach(b=>b.addEventListener('click',()=>{activeUnitTab=b.dataset.unitTab;renderUnitDetail()}));
+$('backToUnitCards').addEventListener('click',showUnitCards);
+$('backToTechnology').addEventListener('click',showTechnology);
+
+
+document.querySelectorAll('[data-wastewater-tool]').forEach(b=>b.addEventListener('click',()=>{
+  const tool=b.dataset.wastewaterTool;
+  hideMainPages();
+  if(tool==='load'){
+    openLoadWorkspace('input');
+    return;
+  }
+  if(tool==='technology'){showTechnology();return}
+  if(tool==='units'){showUnitCards();return}
+  const names={reports:'Báo cáo',tools:'Công cụ'};
+  $('domainComingSoon').dataset.backTarget='wastewater';
+  $('domainComingSoon').classList.remove('hidden');
+  $('domainComingTitle').textContent=names[tool]||'Công cụ nước thải';
+  $('domainComingIcon').textContent='🛠';
+  $('domainComingText').textContent='Chức năng này đã được xác định trong cấu trúc ECS nhưng chưa được triển khai. Sẽ phát triển và kiểm thử ở giai đoạn tiếp theo.';
+}));
+function setLoadTab(view){
+  const isResults=view==='results';
+  document.querySelectorAll('[data-load-tab]').forEach(b=>b.classList.toggle('active',b.dataset.loadTab===view));
+  document.querySelector('.center').classList.toggle('hidden',!isResults);
+  document.querySelector('.right').classList.toggle('hidden',isResults);
+  $('resultStatus').textContent=isResults?'Kết quả tính toán':'Đang nhập thông số đầu vào';
+}
+document.querySelectorAll('[data-load-tab]').forEach(b=>b.addEventListener('click',()=>setLoadTab(b.dataset.loadTab)));
+function openLoadWorkspace(view='input'){
+  currentModule='load';$('inputHeading').textContent='Thông số tải lượng';
+  document.querySelectorAll('[data-module]').forEach(x=>x.classList.toggle('active',x.dataset.module==='load'));
+  showWorkspace();setLoadTab(view);
+}
+$('backToWastewaterTools').addEventListener('click',()=>{hideMainPages();$('wastewaterToolsPage').classList.remove('hidden')});
+const backFromLoad=()=>{hideMainPages();$('wastewaterToolsPage').classList.remove('hidden');document.querySelector('.center').classList.remove('hidden');document.querySelector('.right').classList.remove('hidden')};
+$('backFromLoadWorkspace').addEventListener('click',backFromLoad);
+// Create the bottom navigation control inside .workspace at runtime.
+// This avoids malformed HTML nesting placing it directly under <body>.
+const loadWorkspace=document.querySelector('.workspace');
+const loadBottom=document.createElement('div');
+loadBottom.className='load-workspace-bottom';
+const loadBottomButton=document.createElement('button');
+loadBottomButton.type='button';
+loadBottomButton.className='btn back-button';
+loadBottomButton.textContent='← Quay lại';
+loadBottomButton.addEventListener('click',backFromLoad);
+loadBottom.appendChild(loadBottomButton);
+loadWorkspace.appendChild(loadBottom);
+const returnToLoadChoices=()=>{hideMainPages();$('loadChoicesPage').classList.remove('hidden');document.querySelector('.center').classList.remove('hidden');document.querySelector('.right').classList.remove('hidden')};
+$('backToDomainSelection').addEventListener('click',showDomainSelection);
+$('backToDomains').addEventListener('click',()=>{if($('domainComingSoon').dataset.backTarget==='wastewater'){hideMainPages();$('wastewaterToolsPage').classList.remove('hidden')}else showDomainSelection()});
+// Hiển thị và kích hoạt giao diện ngay từ localStorage; tuyệt đối không chờ IndexedDB.
+renderSavedProjects();
+syncDesignAccess();
+showHome();
+// Đồng bộ IndexedDB chạy nền. Nếu IndexedDB bị blocked/chậm, giao diện vẫn hoạt động.
+(async()=>{
+  const result=await migrateRegistryToIndexedDB();
+  if(result.ok){
+    console.info('ECS storage migration verified:',result.count,'projects; IndexedDB v'+result.version);
+    renderSavedProjects();
+    syncDesignAccess();
+  }else{
+    console.warn('ECS đang dùng localStorage làm nguồn dự phòng; IndexedDB cần được kiểm tra.',result.error);
+    showToast('Dữ liệu vẫn được giữ trong bộ nhớ trình duyệt, nhưng đồng bộ IndexedDB chưa hoàn tất. Hãy xuất JSON để sao lưu.','error',7000);
+  }
+})();
+})();
+</script>
+
+<script>
+
+/* ECS V72 responsive navigation and mobile table labeling. */
+(function(){
+ const top=document.querySelector('.top');
+ const toggle=document.getElementById('ecsMobileMenuToggle');
+ const menu=document.getElementById('ecsMainMenu');
+ if(toggle&&top&&menu){
+   toggle.addEventListener('click',()=>{
+     const open=top.classList.toggle('ecs-menu-open');
+     toggle.setAttribute('aria-expanded',String(open));
+     toggle.setAttribute('aria-label',open?'Đóng menu':'Mở menu');
+     toggle.querySelector('span').textContent=open?'Đóng':'Menu';
+   });
+   menu.addEventListener('click',e=>{
+     const action=e.target.closest('button');
+     if(action && !action.hasAttribute('data-menu')){
+       if(window.matchMedia('(max-width: 760px)').matches){
+         top.classList.remove('ecs-menu-open');toggle.setAttribute('aria-expanded','false');
+         toggle.setAttribute('aria-label','Mở menu');toggle.querySelector('span').textContent='Menu';
+       }
+     }
+   });
+   document.addEventListener('click',e=>{
+     if(!top.contains(e.target)){top.querySelectorAll('.menuwrap.open').forEach(x=>x.classList.remove('open'));}
+   });
+   document.addEventListener('keydown',e=>{if(e.key==='Escape'){
+     top.classList.remove('ecs-menu-open');toggle.setAttribute('aria-expanded','false');
+     toggle.setAttribute('aria-label','Mở menu');toggle.querySelector('span').textContent='Menu';
+     top.querySelectorAll('.menuwrap.open').forEach(x=>x.classList.remove('open'));
+   }});
+ }
+ function labelTables(root){
+   (root||document).querySelectorAll('table').forEach(table=>{
+     if(table.closest('.dropdown'))return;
+     const headers=Array.from(table.querySelectorAll('thead tr:last-child th, thead tr:last-child td')).map(x=>x.textContent.trim());
+     if(!headers.length)return;
+     table.classList.add('ecs-mobile-card-table');
+     table.querySelectorAll('tbody tr').forEach(row=>{
+       Array.from(row.children).filter(x=>x.tagName==='TD').forEach((cell,i)=>{
+         if(!cell.hasAttribute('data-label')&&headers[i])cell.setAttribute('data-label',headers[i]);
+       });
+     });
+   });
+ }
+ labelTables(document);
+ const observer=new MutationObserver(records=>records.forEach(record=>record.addedNodes.forEach(node=>{
+   if(node.nodeType===1){const table=node.matches('table')?node:node.closest('table');if(table)labelTables(table);labelTables(node);}
+ })));
+ observer.observe(document.body,{childList:true,subtree:true});
+})();
+</script>
+</body></html>
