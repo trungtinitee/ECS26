@@ -40,7 +40,7 @@ export const DomainSelectionPage: React.FC<DomainSelectionPageProps> = ({
         {/* NƯỚC THẢI - HOÀN THIỆN ĐẦY ĐỦ */}
         <div
           onClick={() => onSelectDomain('wastewater')}
-          className="p-6 rounded-2xl border-2 border-[#176b45] bg-gradient-to-br from-white via-[#f7fbf8] to-[#edf7f1] hover:shadow-lg cursor-pointer transition-all flex flex-col justify-between gap-4 group relative overflow-hidden"
+          className="p-6 rounded-2xl border-2 border-[#176b45] bg-white hover:shadow-lg cursor-pointer transition-all flex flex-col justify-between gap-4 group relative overflow-hidden"
         >
           <div className="flex items-start gap-4">
             <div className="w-14 h-14 rounded-2xl bg-[#176b45] text-white flex items-center justify-center shrink-0 shadow-md group-hover:scale-105 transition-transform">

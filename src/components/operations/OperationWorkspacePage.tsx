@@ -582,8 +582,8 @@ export const OperationWorkspacePage: React.FC<OperationWorkspacePageProps> = ({
 
       {/* Intro */}
       <div className="text-center max-w-2xl mx-auto space-y-2">
-        <div className="text-[11px] font-extrabold uppercase tracking-widest text-[#176b45]">
-          MODULE VẬN HÀNH HỆ THỐNG
+        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-extrabold uppercase tracking-widest bg-emerald-50 text-[#176b45] border border-emerald-200">
+          Module Vận hành hệ thống
         </div>
         <h1 className="text-2xl sm:text-3xl font-extrabold text-[#193d2c] tracking-tight">
           Chọn phân hệ vận hành
@@ -598,7 +598,7 @@ export const OperationWorkspacePage: React.FC<OperationWorkspacePageProps> = ({
         {/* 1. NƯỚC THẢI - HOÀN THIỆN ĐẦY ĐỦ */}
         <div
           onClick={() => setSelectedSubsystem('wastewater')}
-          className="p-6 rounded-2xl border-2 border-[#176b45] bg-gradient-to-br from-white via-[#f7fbf8] to-[#edf7f1] hover:shadow-lg cursor-pointer transition-all flex flex-col justify-between gap-4 group relative overflow-hidden"
+          className="p-6 rounded-2xl border-2 border-[#176b45] bg-white hover:shadow-lg cursor-pointer transition-all flex flex-col justify-between gap-4 group relative overflow-hidden"
         >
           <div className="flex items-start gap-4">
             <div className="w-14 h-14 rounded-2xl bg-[#176b45] text-white flex items-center justify-center shrink-0 shadow-md group-hover:scale-105 transition-transform">

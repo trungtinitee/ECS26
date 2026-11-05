@@ -558,7 +558,7 @@ export default function App() {
   const activeUnit = technologyUnits.find((u) => u.id === activeUnitId);
 
   return (
-    <div className="min-h-screen bg-[#f2f6f3] text-[#20342b] font-sans flex flex-col selection:bg-[#176b45] selection:text-white">
+    <div className="min-h-screen bg-[#f2f6f3] dark:bg-[#0f1613] text-[#20342b] dark:text-[#e2ece6] font-sans flex flex-col selection:bg-[#176b45] selection:text-white">
       {/* Hidden file input for JSON import */}
       <input
         type="file"

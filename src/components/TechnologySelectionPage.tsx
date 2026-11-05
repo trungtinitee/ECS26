@@ -149,7 +149,7 @@ export const TechnologySelectionPage: React.FC<TechnologySelectionPageProps> = (
         ))}
 
         {/* Selected Units Panel */}
-        <section className="p-5 rounded-2xl border-2 border-[#b5d5c0] bg-gradient-to-br from-white to-[#f5fbf7] shadow-sm space-y-4">
+        <section className="p-5 rounded-2xl border-2 border-[#b5d5c0] bg-white shadow-sm space-y-4">
           <div className="flex items-center justify-between">
             <div>
               <h2 className="text-sm font-extrabold text-[#173a29] flex items-center gap-2">

@@ -1,15 +1,423 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 @layer base {
   html, body {
     font-family: 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     color: #20342b;
     background-color: #f2f6f3;
     -webkit-tap-highlight-color: transparent;
+    transition: background-color 0.2s cubic-bezier(0.16, 1, 0.3, 1), color 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  /* Root canvas in Dark Mode */
+  html.dark, html.dark body {
+    color: #e2ece6;
+    background-color: #0f1613;
   }
 
   button, a, input, select, textarea {
     touch-action: manipulation;
+  }
+}
+
+/* ==========================================================================
+   COMPREHENSIVE DARK THEME ENGINE
+   Eliminates all unstyled white/light spots across every component & calculator
+   ========================================================================== */
+html.dark {
+  color-scheme: dark;
+
+  /* ----------------------------------------------------------------------
+     1. Header, Navigation, Statusbar
+     ---------------------------------------------------------------------- */
+  header.sticky {
+    background-color: #121c17 !important;
+    border-color: #1f3026 !important;
+  }
+
+  header nav {
+    background-color: #101914 !important;
+    border-color: #1b2a21 !important;
+  }
+
+  footer.fixed {
+    background-color: #121c17 !important;
+    border-color: #1f3026 !important;
+  }
+
+  /* Active Menubar Tab */
+  header nav button.bg-\[\#edf5f0\] {
+    background-color: #182a20 !important;
+    color: #34d399 !important;
+    border-bottom: 2px solid #10b981 !important;
+  }
+
+  /* ----------------------------------------------------------------------
+     2. Primary Cards, Sections & Panels (Formerly White)
+     ---------------------------------------------------------------------- */
+  .bg-white,
+  [class*="bg-white/"] {
+    background-color: #14201a !important;
+    border-color: #23362a !important;
+  }
+
+  /* Nullify all light gradients so cards NEVER stay white */
+  [class*="from-white"],
+  [class*="to-white"],
+  [class*="via-white"],
+  [class*="via-[#f7fbf8]"],
+  [class*="to-[#edf7f1]"],
+  [class*="to-[#fafcfb]"],
+  [class*="to-[#f5fbf7]"] {
+    background-image: none !important;
+    background-color: #14201a !important;
+    border-color: #24372c !important;
+  }
+
+  /* ----------------------------------------------------------------------
+     3. Complete Exhaustive Mapping of ALL Light Backgrounds in Codebase
+     ---------------------------------------------------------------------- */
+  /* Pale White-Green & Light Gray Surfaces */
+  .bg-\[\#fbfdfb\],
+  .bg-\[\#f8faf8\],
+  .bg-\[\#fbfdfc\],
+  .bg-\[\#f9fbf9\],
+  .bg-\[\#f2f8f4\],
+  .bg-\[\#e4f1e8\],
+  .bg-\[\#f5f8f6\],
+  .bg-\[\#edf5f0\],
+  .bg-\[\#eaf3ee\],
+  .bg-\[\#f0f6f2\],
+  .bg-\[\#f0f7f3\],
+  .bg-\[\#eef5f1\],
+  .bg-\[\#f5f9f6\],
+  .bg-\[\#f7faf8\],
+  .bg-\[\#f0f8f3\],
+  .bg-\[\#f4f8f5\],
+  .bg-\[\#eaf4ee\],
+  .bg-\[\#e2ede6\],
+  .bg-\[\#f3f7f4\],
+  .bg-\[\#f8faf9\],
+  .bg-\[\#f4f7f5\],
+  .bg-\[\#f4faf6\],
+  .bg-\[\#f6faf7\],
+  .bg-\[\#fafcfb\],
+  .bg-\[\#e2ece6\],
+  .bg-\[\#e8f3ec\],
+  .bg-\[\#f0f5f2\],
+  .bg-\[\#f5faf7\],
+  .bg-\[\#dbe8df\],
+  .bg-\[\#e2f0e7\],
+  .bg-\[\#e3eae5\],
+  .bg-\[\#eef2f0\],
+  .bg-\[\#f2f7f4\],
+  .bg-\[\#f3f8f5\],
+  .bg-\[\#f2f6f3\],
+  .bg-\[\#fafafa\],
+  .bg-\[\#fbfcfb\],
+  .bg-\[\#fcfdfc\],
+  .bg-\[\#fcfdfe\],
+  .bg-\[\#e4f1ea\],
+  .bg-\[\#e6efe9\],
+  .bg-\[\#e8f2ec\],
+  .bg-\[\#e8f3ed\],
+  .bg-\[\#e9f4ee\],
+  .bg-\[\#eaf3ed\],
+  .bg-\[\#eaf4ed\],
+  .bg-\[\#edf6f1\],
+  .bg-\[\#eef6f1\],
+  .bg-\[\#f2faf5\],
+  .bg-\[\#f6f9f7\],
+  .bg-\[\#f7fbf8\],
+  .bg-\[\#f8fbf9\],
+  .bg-gray-50,
+  .bg-gray-100,
+  .bg-slate-50,
+  .bg-slate-100 {
+    background-color: #18261f !important;
+    border-color: #273d30 !important;
+  }
+
+  /* ----------------------------------------------------------------------
+     4. Domain & Status Badges (Clean Dark-Tinted Containers)
+     ---------------------------------------------------------------------- */
+  /* Emerald / Green Badges */
+  .bg-\[\#e5f2e9\],
+  .bg-\[\#e3f2e8\],
+  .bg-\[\#e3f4ea\],
+  .bg-\[\#e6f3eb\],
+  .bg-\[\#e7f3ec\],
+  .bg-\[\#eef8f2\],
+  .bg-emerald-50,
+  .bg-emerald-100 {
+    background-color: #122e20 !important;
+    color: #34d399 !important;
+    border: 1px solid #1c4a34 !important;
+  }
+
+  /* Blue / Water Badges */
+  .bg-blue-50,
+  .bg-blue-100,
+  .bg-sky-50,
+  .bg-cyan-50 {
+    background-color: #0f2636 !important;
+    color: #38bdf8 !important;
+    border: 1px solid #1a425c !important;
+  }
+  .text-blue-600, .text-blue-700, .text-sky-600, .text-cyan-600 {
+    color: #38bdf8 !important;
+  }
+  .border-blue-200, .border-sky-200, .border-cyan-200 {
+    border-color: #1a425c !important;
+  }
+
+  /* Amber / Warning Badges */
+  .bg-amber-50,
+  .bg-amber-100,
+  .bg-amber-50\/50,
+  .bg-\[\#fffdf7\],
+  .bg-\[\#fff9ed\],
+  .bg-\[\#fff0db\],
+  .bg-\[\#fef4e5\] {
+    background-color: #271c0c !important;
+    color: #fbbf24 !important;
+    border: 1px solid #4a3617 !important;
+  }
+  .text-amber-900, .text-amber-800, .text-amber-700, .text-amber-600 {
+    color: #fbbf24 !important;
+  }
+  .border-amber-200, .border-amber-100 {
+    border-color: #4a3617 !important;
+  }
+
+  /* Red / Danger Badges */
+  .bg-red-50,
+  .bg-red-100,
+  .bg-\[\#fff5f5\],
+  .bg-\[\#fff8f8\],
+  .bg-\[\#fff0ef\],
+  .bg-\[\#fdeeed\] {
+    background-color: #281212 !important;
+    color: #f87171 !important;
+    border: 1px solid #4d2020 !important;
+  }
+  .text-red-700, .text-red-600, .text-red-500, .text-rose-600 {
+    color: #f87171 !important;
+  }
+  .border-red-100, .border-red-200, .border-\[\#eed2d0\], .border-\[\#f5c6cb\] {
+    border-color: #4d2020 !important;
+  }
+
+  /* ----------------------------------------------------------------------
+     5. Universal Hover State Fix (Zero White Flashes)
+     ---------------------------------------------------------------------- */
+  .hover\:bg-gray-50:hover,
+  .hover\:bg-gray-100:hover,
+  .hover\:bg-white:hover,
+  .hover\:bg-white\/60:hover,
+  .hover\:bg-white\/70:hover,
+  .hover\:bg-\[\#edf5f0\]:hover,
+  .hover\:bg-\[\#f2f8f4\]:hover,
+  .hover\:bg-\[\#e2f0e7\]:hover,
+  .hover\:bg-\[\#eaf3ee\]:hover,
+  .hover\:bg-\[\#f3f7f4\]:hover,
+  .hover\:bg-\[\#f4f7f5\]:hover,
+  .hover\:bg-\[\#e2ede6\]:hover,
+  .hover\:bg-\[\#eef5f1\]:hover {
+    background-color: #1c2e24 !important;
+  }
+
+  /* ----------------------------------------------------------------------
+     6. Border Overrides (Clean, Consistent Dark Lines)
+     ---------------------------------------------------------------------- */
+  .border-\[\#cbd8d0\],
+  .border-\[\#cfded4\],
+  .border-\[\#e5eee8\],
+  .border-\[\#d2e3d8\],
+  .border-\[\#cfdcd4\],
+  .border-\[\#edf3ef\],
+  .border-\[\#d8e6de\],
+  .border-\[\#c4dcce\],
+  .border-\[\#e2ece5\],
+  .border-\[\#d6e5dc\],
+  .border-\[\#d3e3d8\],
+  .border-\[\#d2dfd6\],
+  .border-\[\#b9e0c7\],
+  .border-\[\#dce7e1\],
+  .border-\[\#d6e3db\],
+  .border-\[\#d6e2da\],
+  .border-\[\#b8dbc3\],
+  .border-\[\#e2ede6\],
+  .border-\[\#dce8e0\],
+  .border-\[\#cfd9d2\],
+  .border-\[\#d5e0d8\],
+  .border-\[\#d3dfd7\],
+  .border-\[\#d2ded6\],
+  .border-\[\#b9dfc8\],
+  .border-\[\#edf4f0\],
+  .border-\[\#d2e4d8\],
+  .border-\[\#e1ece4\],
+  .border-\[\#d8ece0\],
+  .border-\[\#d4e1d9\],
+  .border-\[\#c4d7cc\],
+  .border-\[\#bfe0cd\],
+  .border-\[\#e5efe8\],
+  .border-\[\#e5ece8\],
+  .border-gray-100,
+  .border-gray-200,
+  .border-gray-300 {
+    border-color: #23372c !important;
+  }
+
+  /* Primary Emerald Border & Rings */
+  .border-\[\#176b45\],
+  .border-2.border-\[\#176b45\],
+  .border-emerald-600 {
+    border-color: #10b981 !important;
+  }
+  .ring-\[\#176b45\]\/15,
+  .ring-\[\#176b45\]\/20 {
+    --tw-ring-color: rgba(16, 185, 129, 0.3) !important;
+  }
+
+  /* ----------------------------------------------------------------------
+     7. Typography & Contrast (Crisp Ivory Titles + Mint Emerald Numbers)
+     ---------------------------------------------------------------------- */
+  /* Headings & High Contrast Text */
+  .text-\[\#234333\],
+  .text-\[\#183929\],
+  .text-\[\#183b2b\],
+  .text-\[\#183a2a\],
+  .text-\[\#193a2a\],
+  .text-\[\#193d2c\],
+  .text-\[\#173827\],
+  .text-\[\#173a29\],
+  .text-\[\#1a382a\],
+  .text-\[\#1a3a2a\],
+  .text-\[\#143d29\],
+  .text-\[\#1f4532\],
+  .text-\[\#1e4532\],
+  .text-\[\#20362c\],
+  .text-\[\#20342b\],
+  .text-\[\#204030\],
+  .text-\[\#243f30\],
+  .text-\[\#1b3d2c\],
+  .text-\[\#1c422f\],
+  .text-\[\#1c4531\],
+  .text-\[\#1b4330\],
+  .text-\[\#1d3d2e\],
+  .text-\[\#2c4b3a\],
+  .text-gray-900,
+  .text-gray-800 {
+    color: #f1f7f3 !important;
+  }
+
+  /* Key Metrics, Calculated Outputs & Links (Luminous Mint Emerald) */
+  .text-\[\#176b45\],
+  .text-\[\#125837\],
+  .text-\[\#105a39\],
+  .text-\[\#135938\],
+  .text-\[\#28573d\],
+  .text-\[\#244b36\],
+  .text-\[\#218653\],
+  .text-emerald-700,
+  .text-emerald-800,
+  .text-emerald-900,
+  .text-emerald-950 {
+    color: #34d399 !important;
+  }
+
+  /* Secondary & Muted Descriptions */
+  .text-\[\#63776d\],
+  .text-\[\#43594d\],
+  .text-\[\#708477\],
+  .text-\[\#5a7264\],
+  .text-\[\#728578\],
+  .text-\[\#718779\],
+  .text-\[\#5b7264\],
+  .text-\[\#788e81\],
+  .text-\[\#526b5d\],
+  .text-\[\#445b4e\],
+  .text-\[\#52665a\],
+  .text-\[\#556c5e\],
+  .text-\[\#64796e\],
+  .text-\[\#64786d\],
+  .text-\[\#3e5648\],
+  .text-\[\#687d70\],
+  .text-\[\#667a6e\],
+  .text-\[\#677b6f\],
+  .text-\[\#385444\],
+  .text-\[\#55695e\],
+  .text-\[\#5d7568\],
+  .text-\[\#526d5d\],
+  .text-\[\#526a5c\],
+  .text-\[\#526559\],
+  .text-\[\#556e60\],
+  .text-\[\#4a6354\],
+  .text-\[\#415e4f\],
+  .text-\[\#4d6657\],
+  .text-\[\#405a4b\],
+  .text-\[\#3b5044\],
+  .text-\[\#3d5446\],
+  .text-\[\#3b5446\],
+  .text-\[\#829288\],
+  .text-gray-500,
+  .text-gray-600 {
+    color: #9eb5a8 !important;
+  }
+
+  /* ----------------------------------------------------------------------
+     8. Inset Form Inputs, Selects, Dropdowns, NumericInputs
+     ---------------------------------------------------------------------- */
+  input:not([type="checkbox"]):not([type="radio"]),
+  select,
+  textarea,
+  option {
+    background-color: #0e1511 !important;
+    border-color: #273b30 !important;
+    color: #f1f7f3 !important;
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.4);
+  }
+
+  input:focus,
+  select:focus,
+  textarea:focus {
+    border-color: #10b981 !important;
+    box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.25) !important;
+    outline: none !important;
+  }
+
+  /* ----------------------------------------------------------------------
+     9. Tables & Technical Lists
+     ---------------------------------------------------------------------- */
+  thead tr {
+    background-color: #16231c !important;
+    color: #a6c0b1 !important;
+    border-bottom: 1px solid #26382e !important;
+  }
+
+  tbody tr {
+    border-bottom: 1px solid #1c2b22 !important;
+  }
+
+  tbody tr:hover {
+    background-color: #1a2921 !important;
+  }
+
+  /* ----------------------------------------------------------------------
+     10. Modals, Popups & Shadow Depths
+     ---------------------------------------------------------------------- */
+  .shadow-xl, .shadow-lg, .shadow-md, .shadow-2xl {
+    box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.7), 0 0 0 1px #23362a !important;
+  }
+
+  /* Code tags */
+  code {
+    background-color: #16241c !important;
+    color: #34d399 !important;
+    border: 1px solid #284031 !important;
   }
 }
 
@@ -32,6 +440,13 @@
 }
 ::-webkit-scrollbar-thumb:hover {
   background: #9ab4a3;
+}
+
+html.dark ::-webkit-scrollbar-thumb {
+  background: #25392e;
+}
+html.dark ::-webkit-scrollbar-thumb:hover {
+  background: #365342;
 }
 
 @keyframes fadeIn {

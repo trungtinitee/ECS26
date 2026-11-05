@@ -18,10 +18,14 @@ import {
   Info,
   CheckCircle2,
   BookOpen,
+  Sun,
+  Moon,
+  Monitor,
 } from 'lucide-react';
 import { ActiveDomain } from '../types/ecs';
 import { getDecimalDigits, setDecimalDigits, formatNumber } from '../utils/calculations';
 import { EcsLogo } from './common/EcsLogo';
+import { useTheme } from '../utils/theme';
 
 interface HeaderProps {
   currentProjectName: string;
@@ -53,6 +57,7 @@ export const Header: React.FC<HeaderProps> = ({
   onOpenOperationHub,
   currentView,
 }) => {
+  const { theme, isDark, setTheme, toggleTheme } = useTheme();
   const [openMenu, setOpenMenu] = useState<string | null>(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [precision, setPrecision] = useState<number>(() => getDecimalDigits());
@@ -112,6 +117,27 @@ export const Header: React.FC<HeaderProps> = ({
 
         {/* Quick action buttons & mobile toggle */}
         <div className="flex items-center gap-2">
+          {/* Theme Mode Toggle Button */}
+          <button
+            type="button"
+            onClick={toggleTheme}
+            title={isDark ? 'Chuyển sang giao diện sáng' : 'Chuyển sang giao diện tối'}
+            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-[#cfd9d2] text-[#20342b] hover:bg-[#f3f7f4] transition-all cursor-pointer shadow-xs"
+            aria-label="Toggle theme"
+          >
+            {isDark ? (
+              <>
+                <Sun className="w-3.5 h-3.5 text-amber-400" />
+                <span className="text-[11px] font-semibold hidden sm:inline">Giao diện Sáng</span>
+              </>
+            ) : (
+              <>
+                <Moon className="w-3.5 h-3.5 text-[#176b45]" />
+                <span className="text-[11px] font-semibold hidden sm:inline">Giao diện Tối</span>
+              </>
+            )}
+          </button>
+
           <button
             type="button"
             onClick={onSaveLocal}
@@ -487,6 +513,60 @@ export const Header: React.FC<HeaderProps> = ({
                 >
                   <X className="w-3.5 h-3.5" />
                 </button>
+              </div>
+
+              {/* TÙY CHỌN GIAO DIỆN HIỂN THỊ (THEME) */}
+              <div className="p-3 bg-[#f6faf7] border border-[#d2e4d8] rounded-xl space-y-2.5">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-1.5 font-bold text-xs text-[#183b2b]">
+                    {isDark ? <Moon className="w-3.5 h-3.5 text-amber-400" /> : <Sun className="w-3.5 h-3.5 text-[#176b45]" />}
+                    <span>Chế độ giao diện (Theme)</span>
+                  </div>
+                  <span className="text-[10px] font-bold text-[#176b45] bg-[#e3f2e8] px-2 py-0.5 rounded-full border border-[#c2e2cc]">
+                    {theme === 'dark' ? 'Tối (Dark)' : theme === 'light' ? 'Sáng (Light)' : 'Tự động (System)'}
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-3 gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setTheme('light')}
+                    className={`p-2.5 rounded-xl text-center border transition-all cursor-pointer ${
+                      theme === 'light'
+                        ? 'bg-white border-[#176b45] ring-2 ring-[#176b45]/15 shadow-xs font-bold text-[#176b45]'
+                        : 'bg-white/70 border-[#d2ded6] hover:bg-white text-[#425a4c]'
+                    }`}
+                  >
+                    <Sun className="w-4 h-4 mx-auto mb-1 text-amber-500" />
+                    <span className="text-[11px] block">Giao diện Sáng</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setTheme('dark')}
+                    className={`p-2.5 rounded-xl text-center border transition-all cursor-pointer ${
+                      theme === 'dark'
+                        ? 'bg-white border-[#176b45] ring-2 ring-[#176b45]/15 shadow-xs font-bold text-[#176b45]'
+                        : 'bg-white/70 border-[#d2ded6] hover:bg-white text-[#425a4c]'
+                    }`}
+                  >
+                    <Moon className="w-4 h-4 mx-auto mb-1 text-indigo-400" />
+                    <span className="text-[11px] block">Giao diện Tối</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setTheme('system')}
+                    className={`p-2.5 rounded-xl text-center border transition-all cursor-pointer ${
+                      theme === 'system'
+                        ? 'bg-white border-[#176b45] ring-2 ring-[#176b45]/15 shadow-xs font-bold text-[#176b45]'
+                        : 'bg-white/70 border-[#d2ded6] hover:bg-white text-[#425a4c]'
+                    }`}
+                  >
+                    <Monitor className="w-4 h-4 mx-auto mb-1 text-emerald-500" />
+                    <span className="text-[11px] block">Theo hệ thống</span>
+                  </button>
+                </div>
               </div>
 
               {/* TÙY CHỈNH LÀM TRÒN SỐ LIỆU TÍNH TOÁN */}

@@ -266,7 +266,7 @@ export const UnitCardsPage: React.FC<UnitCardsPageProps> = ({
               <div
                 key={unit.id}
                 onClick={() => onOpenUnit(unit.id)}
-                className="p-5 rounded-2xl border border-[#d6e3db] bg-gradient-to-b from-white to-[#fafcfb] hover:border-[#176b45] hover:shadow-md cursor-pointer transition-all flex flex-col justify-between gap-4 group"
+                className="p-5 rounded-2xl border border-[#d6e3db] bg-white hover:border-[#176b45] hover:shadow-md cursor-pointer transition-all flex flex-col justify-between gap-4 group"
               >
                 <div className="space-y-3">
                   <div className="flex items-start justify-between gap-2">
